@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServeBeer - Community-Sponsored IPFS Storage{% if testing_mode %} (BETA){% endif %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+            color: #ECF0F1;
+            min-height: 100vh;
+        }
+
+        /* Beta Banner */
+        {% if testing_mode %}
+        .beta-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .content-offset {
+            margin-top: 50px;
+        }
+        {% endif %}
+
+        /* Header */
+        .header {
+            background: rgba(26, 188, 156, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #4ECDC4;
+            padding: 15px 0;
+            {% if testing_mode %}margin-top: 50px;{% endif %}
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #4ECDC4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4ECDC4;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #BDC3C7;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Testing Notice */
+        {% if testing_mode %}
+        .testing-notice {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: 2px solid #2980b9;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .testing-notice h2 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .testing-notice p {
+            color: #ecf0f1;
+            margin-bottom: 10px;
+        }
+        {% endif %}
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Force 4 równe kolumny */
+            gap: 20px;
+            margin: 60px auto;
+            max-width: 1200px; /* Zwiększone z 1000px */
+            padding: 0 20px;
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 1024px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr); /* 2 kolumny na tablet */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr; /* 1 kolumna na mobile */
+            }
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .nav-container { flex-direction: column; gap: 15px; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+        .feature-card {
+            background: rgba(26, 188, 156, 0.1);
+            border: 1px solid #4ECDC4;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4ECDC4;
+            margin-bottom: 15px;
+        }
+
+        .feature-desc {
+            color: #BDC3C7;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4ECDC4;
+            margin-bottom: 20px;
+        }
+
+        .cta-subtitle {
+            font-size: 1.1rem;
+            color: #BDC3C7;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.5);
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 2px solid #4ECDC4;
+            color: #4ECDC4;
+        }
+
+        .cta-btn.secondary:hover {
+            background: #4ECDC4;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #95A5A6;
+            border-top: 1px solid #34495E;
+            margin-top: 60px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .nav-container { flex-direction: column; gap: 15px; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    {% if testing_mode %}
+    <div class="beta-banner">
+        🚀 BETA VERSION - Fully Functional IPFS Service | All Features Unlocked for Testing 🚀
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">🍺</div>
+                <div class="logo-text">ServeBeer{% if testing_mode %} (BETA){% endif %}</div>
+            </div>
+            <a href="/login" class="login-btn">{% if testing_mode %}Join Beta{% else %}Login{% endif %}</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">Community-Sponsored IPFS Storage{% if testing_mode %} (BETA){% endif %}</h1>
+        <p class="hero-subtitle">
+            Decentralized file hosting powered by Raspberry Pi infrastructure and crypto community support. 
+            {% if testing_mode %}
+            Beta testing phase - all features unlocked for free!
+            {% else %}
+            Upload your files, support the network, be part of the revolution.
+            {% endif %}
+        </p>
+
+        {% if testing_mode %}
+        <div class="testing-notice">
+            <h2>🚀 Welcome to ServeBeer BETA!</h2>
+            <p><strong>This is a fully functional IPFS pinning service</strong></p>
+            <p>✅ All storage tiers unlocked for testing</p>
+            <p>✅ Your pins are real and persist normally</p>
+            <p>✅ No payment required during beta phase</p>
+            <p>🧪 Help us test and improve the service!</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Lightning Fast</h3>
+            <p class="feature-desc">IPFS-powered distribution ensures your files are available instantly across the decentralized network.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3 class="feature-title">Truly Decentralized</h3>
+            <p class="feature-desc">No corporate servers. Your files live on community-run Raspberry Pi nodes across the globe.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">💎</div>
+            <h3 class="feature-title">Crypto Native</h3>
+            <p class="feature-desc">
+                {% if testing_mode %}
+                Free during beta! Future: Pay with Bitcoin, Ethereum, or sponsor the community pool.
+                {% else %}
+                Pay with Bitcoin, Ethereum, or sponsor the community pool. No credit cards, no KYC, no surveillance.
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">🏛️</div>
+            <h3 class="feature-title">Community Governed</h3>
+            <p class="feature-desc">Transparent sponsorship model where community members support infrastructure and get recognized for their contribution.</p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2 class="cta-title">{% if testing_mode %}Join the Beta Test{% else %}Ready to Join the Revolution?{% endif %}</h2>
+        <p class="cta-subtitle">
+            {% if testing_mode %}
+            Be among the first to test our decentralized IPFS infrastructure. 
+            All features are unlocked and your feedback shapes the final product.
+            {% else %}
+            Whether you want to store files, sponsor the community, or run your own node - 
+            there's a place for you in the ServeBeer ecosystem.
+            {% endif %}
+        </p>
+        
+        <div class="cta-buttons">
+            {% if testing_mode %}
+            <a href="/register" class="cta-btn">Join Beta Testing</a>
+            <a href="/login" class="cta-btn secondary">Already Have Account?</a>
+            {% else %}
+            <a href="/sponsors" class="cta-btn">Become a Sponsor</a>
+            <a href="/register" class="cta-btn secondary">Start Using Storage</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>ServeBeer IPFS CDN - Guerrilla Infrastructure © 2025</p>
+        <p>"Fire beneath the ashes, code as memory" | 0x660C</p>
+        {% if testing_mode %}
+        <p><strong>Beta Version</strong> - Help us test and improve!</p>
+        {% endif %}
+    </footer>
+</body>
+</html>

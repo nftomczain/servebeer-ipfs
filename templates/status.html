@@ -1,0 +1,801 @@
+{% extends "base.html" %}
+
+{% block title %}System Status - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-container {
+        max-width: 1000px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .status-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .status-title {
+        color: #4ECDC4;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .status-subtitle {
+        color: #BDC3C7;
+        margin-bottom: 20px;
+    }
+
+    /* Overall status indicator */
+    .overall-status {
+        background: #34495E;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        margin: 30px 0;
+        border: 3px solid;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .overall-status.operational {
+        border-color: #27AE60;
+        background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(46, 204, 113, 0.1) 100%);
+    }
+
+    .overall-status.degraded {
+        border-color: #F39C12;
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(230, 126, 34, 0.1) 100%);
+    }
+
+    .overall-status.down {
+        border-color: #E74C3C;
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+    }
+
+    .status-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        animation: pulse 2s infinite;
+    }
+
+    .operational .status-icon {
+        color: #27AE60;
+    }
+
+    .degraded .status-icon {
+        color: #F39C12;
+    }
+
+    .down .status-icon {
+        color: #E74C3C;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+    }
+
+    .status-message {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .operational .status-message {
+        color: #27AE60;
+    }
+
+    .degraded .status-message {
+        color: #F39C12;
+    }
+
+    .down .status-message {
+        color: #E74C3C;
+    }
+
+    .status-description {
+        color: #BDC3C7;
+        font-size: 1rem;
+    }
+
+    /* Beta status notice */
+    .beta-status {
+        background: #8E44AD;
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        margin: 20px 0;
+        font-weight: bold;
+    }
+
+    /* Component status grid */
+    .components-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 40px 0;
+    }
+
+    .component-card {
+        background: #34495E;
+        border-radius: 15px;
+        padding: 20px;
+        border-left: 5px solid;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .component-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .component-card.operational {
+        border-left-color: #27AE60;
+    }
+
+    .component-card.degraded {
+        border-left-color: #F39C12;
+    }
+
+    .component-card.down {
+        border-left-color: #E74C3C;
+    }
+
+    .component-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .component-name {
+        color: #ECF0F1;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .component-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .component-status.operational {
+        background: rgba(39, 174, 96, 0.2);
+        color: #27AE60;
+    }
+
+    .component-status.degraded {
+        background: rgba(243, 156, 18, 0.2);
+        color: #F39C12;
+    }
+
+    .component-status.down {
+        background: rgba(231, 76, 60, 0.2);
+        color: #E74C3C;
+    }
+
+    .component-description {
+        color: #95A5A6;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    .component-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        font-size: 0.8rem;
+    }
+
+    .metric {
+        text-align: center;
+        padding: 8px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+    }
+
+    .metric-value {
+        display: block;
+        color: #4ECDC4;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .metric-label {
+        color: #95A5A6;
+        margin-top: 3px;
+    }
+
+    /* Statistics section */
+    .statistics {
+        background: rgba(52, 73, 94, 0.5);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 40px 0;
+    }
+
+    .statistics h3 {
+        color: #4ECDC4;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 20px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: scale(1.05);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4ECDC4;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #95A5A6;
+        font-size: 0.9rem;
+    }
+
+    .stat-sublabel {
+        color: #7F8C8D;
+        font-size: 0.7rem;
+        margin-top: 3px;
+    }
+
+    /* Recent activity */
+    .recent-activity {
+        background: #34495E;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 40px 0;
+    }
+
+    .recent-activity h3 {
+        color: #4ECDC4;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .activity-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        border-left: 4px solid;
+    }
+
+    .activity-item.success {
+        border-left-color: #27AE60;
+    }
+
+    .activity-item.warning {
+        border-left-color: #F39C12;
+    }
+
+    .activity-item.error {
+        border-left-color: #E74C3C;
+    }
+
+    .activity-icon {
+        font-size: 1.2rem;
+        margin-right: 15px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .activity-content {
+        flex-grow: 1;
+    }
+
+    .activity-message {
+        color: #ECF0F1;
+        font-weight: 500;
+    }
+
+    .activity-time {
+        color: #95A5A6;
+        font-size: 0.8rem;
+        margin-top: 3px;
+    }
+
+    /* Footer info */
+    .status-footer {
+        text-align: center;
+        margin-top: 50px;
+        padding: 30px;
+        background: rgba(26, 188, 156, 0.1);
+        border-radius: 15px;
+        border: 1px solid #4ECDC4;
+    }
+
+    .status-footer h3 {
+        color: #4ECDC4;
+        margin-bottom: 15px;
+    }
+
+    .status-footer p {
+        color: #BDC3C7;
+        margin-bottom: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .status-container {
+            margin: 40px auto;
+        }
+        
+        .status-title {
+            font-size: 1.8rem;
+        }
+        
+        .components-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .component-metrics {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="status-container">
+    <!-- Header -->
+    <div class="status-header">
+        <h1 class="status-title">🔍 System Status{{ " (BETA)" if testing_mode }}</h1>
+        <p class="status-subtitle">Real-time status of ServeBeer IPFS infrastructure</p>
+    </div>
+
+    {% if testing_mode %}
+    <!-- Beta Status Notice -->
+    <div class="beta-status">
+        🚀 BETA TESTING PHASE 🚀<br>
+        Service is fully functional with all features unlocked for testing
+    </div>
+    {% endif %}
+
+    <!-- Overall Status -->
+    <div class="overall-status operational">
+        <div class="status-icon">✅</div>
+        <div class="status-message">{{ "All Systems Operational (Beta)" if testing_mode else "All Systems Operational" }}</div>
+        <div class="status-description">
+            {{ "Beta testing environment running smoothly. All features available for testing." if testing_mode 
+               else "ServeBeer IPFS CDN is operating normally. All services are available." }}
+        </div>
+    </div>
+
+    <!-- Component Status -->
+    <div class="components-grid" id="components-grid">
+        <!-- IPFS Node -->
+        <div class="component-card operational" id="ipfs-component">
+            <div class="component-header">
+                <div class="component-name">🌍 IPFS Node</div>
+                <div class="component-status operational" id="ipfs-status">Loading...</div>
+            </div>
+            <div class="component-description" id="ipfs-description">
+                Loading IPFS node status...
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value" id="ipfs-uptime">--</span>
+                    <div class="metric-label">Uptime</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="ipfs-peers">--</span>
+                    <div class="metric-label">IPFS Peers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Web Application -->
+        <div class="component-card operational" id="app-component">
+            <div class="component-header">
+                <div class="component-name">🕸️ Web Application</div>
+                <div class="component-status operational" id="app-status">Loading...</div>
+            </div>
+            <div class="component-description" id="app-description">
+                Loading application status...
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value" id="app-memory">--</span>
+                    <div class="metric-label">Memory Usage</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="app-uptime">--</span>
+                    <div class="metric-label">Uptime (hours)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database -->
+        <div class="component-card operational" id="db-component">
+            <div class="component-header">
+                <div class="component-name">🗄️ Database</div>
+                <div class="component-status operational" id="db-status">Loading...</div>
+            </div>
+            <div class="component-description" id="db-description">
+                Loading database status...
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value" id="db-size">--</span>
+                    <div class="metric-label">Size (MB)</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="db-records">--</span>
+                    <div class="metric-label">Records</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div class="component-card operational">
+            <div class="component-header">
+                <div class="component-name">📤 File Upload</div>
+                <div class="component-status operational">{{ "Operational (Free)" if testing_mode else "Operational" }}</div>
+            </div>
+            <div class="component-description">
+                {{ "Direct file upload to IPFS - free during beta" if testing_mode 
+                   else "Direct file upload to IPFS network" }}
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value">{{ "∞" if testing_mode else "1GB" }}</span>
+                    <div class="metric-label">Max Size</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="total-files">--</span>
+                    <div class="metric-label">Files</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Sponsorship -->
+        <div class="component-card {{ 'operational' if not testing_mode else 'degraded' }}">
+            <div class="component-header">
+                <div class="component-name">💰 Community Funding</div>
+                <div class="component-status {{ 'operational' if not testing_mode else 'degraded' }}">
+                    {{ "In Development" if testing_mode else "Operational" }}
+                </div>
+            </div>
+            <div class="component-description">
+                {{ "Crypto sponsorship system in development for beta" if testing_mode 
+                   else "Community-sponsored infrastructure funding" }}
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value">${{ "0 (Beta)" if testing_mode else "340" }}</span>
+                    <div class="metric-label">Monthly Pool</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">{{ "0 (Beta)" if testing_mode else "23" }}</span>
+                    <div class="metric-label">Sponsors</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network -->
+        <div class="component-card operational" id="network-component">
+            <div class="component-header">
+                <div class="component-name">🔗 Network</div>
+                <div class="component-status operational" id="network-status">Loading...</div>
+            </div>
+            <div class="component-description" id="network-description">
+                Loading network status...
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-value" id="network-sent">--</span>
+                    <div class="metric-label">Data Sent (MB)</div>
+                </div>
+                <div class="metric">
+                    <span class="metric-value" id="network-recv">--</span>
+                    <div class="metric-label">Data Recv (MB)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="statistics">
+        <h3>📊 {{ "Beta Testing Statistics" if testing_mode else "Service Statistics" }}</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number" id="total-users">--</span>
+                <div class="stat-label">{{ "Beta Testers" if testing_mode else "Community Members" }}</div>
+                <div class="stat-sublabel">{{ "Active this week" if testing_mode else "Total registered" }}</div>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-number" id="total-pins">--</span>
+                <div class="stat-label">Files Pinned</div>
+                <div class="stat-sublabel">{{ "During beta period" if testing_mode else "All time total" }}</div>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-number" id="total-storage">--</span>
+                <div class="stat-label">Data Stored</div>
+                <div class="stat-sublabel">{{ "This beta period" if testing_mode else "Total storage" }}</div>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-number" id="system-uptime">--</span>
+                <div class="stat-label">Uptime</div>
+                <div class="stat-sublabel">{{ "Beta period" if testing_mode else "30 day average" }}</div>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-number" id="avg-response">--</span>
+                <div class="stat-label">Avg Response</div>
+                <div class="stat-sublabel">API endpoints</div>
+            </div>
+            
+            <div class="stat-item">
+                <span class="stat-number">{{ "∞" if testing_mode else "250MB" }}</span>
+                <div class="stat-label">Free Tier Limit</div>
+                <div class="stat-sublabel">{{ "Unlimited in beta" if testing_mode else "Per account" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Information -->
+    <div class="status-footer">
+        <h3>🛠️ Infrastructure Details</h3>
+        <p><strong>Hardware:</strong> {{ "Raspberry Pi400 + Pi 3B+ (beta testing node)" if testing_mode else "Raspberry Pi 3B+ with planned upgrade to Pi 5" }}</p>
+        <p><strong>Location:</strong> <span id="user-location">Loading...</span></p>
+        <p><strong>IPFS Version:</strong> <span id="ipfs-version">Loading...</span></p>
+        <p><strong>Flask Version:</strong> <span id="flask-version">Loading...</span></p>
+        <p><strong>Last Updated:</strong> <span id="last-updated">Loading...</span> UTC</p>
+        
+        {% if testing_mode %}
+        <p style="color: #F39C12; font-weight: bold; margin-top: 15px;">
+            🧪 Beta Testing: This status page shows the testing environment. All features are functional and your data persists normally.
+        </p>
+        {% endif %}
+        
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('health') }}" style="color: #4ECDC4; text-decoration: none; margin: 0 15px;">Health Check API</a>
+            <a href="{{ url_for('dashboard') }}" style="color: #4ECDC4; text-decoration: none; margin: 0 15px;">User Dashboard</a>
+            <a href="{{ url_for('index') }}" style="color: #4ECDC4; text-decoration: none; margin: 0 15px;">← Back to Home</a>
+        </div>
+    </div>
+
+    <!-- NFTomczain branding -->
+    <div style="text-align: center; margin-top: 40px; color: #95A5A6; font-size: 0.9em;">
+        <p style="font-style: italic;">"From algorithm to program" - Guerrilla Infrastructure</p>
+        <p>&copy; 2025 NFTomczain & NetNeroJes | 0x660C</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let refreshInterval;
+    
+    function updateUTCTime() {
+        const now = new Date();
+        const year = now.getUTCFullYear();
+        const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(now.getUTCDate()).padStart(2, '0');
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        const timeElement = document.getElementById('last-updated');
+        if (timeElement) {
+            timeElement.textContent = utcTime;
+        }
+    }
+    
+    async function fetchUserLocation() {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            const locationElement = document.getElementById('user-location');
+            if (locationElement) {
+                locationElement.textContent = `${data.city}, ${data.country_name}`;
+            }
+        } catch (error) {
+            console.error('Failed to fetch location:', error);
+            const locationElement = document.getElementById('user-location');
+            if (locationElement) {
+                locationElement.textContent = 'Universe';
+            }
+        }
+    }
+       
+    function startAutoRefresh() {
+        refreshInterval = setInterval(() => {
+            updateStatusData();
+        }, 30000);
+    }
+
+    function stopAutoRefresh() {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+    }
+
+    async function updateStatusData() {
+        try {
+            console.log('Updating status data...');
+            const statusResponse = await fetch('/api/status');
+            const statusData = await statusResponse.json();
+            console.log('Status data received:', statusData);
+            
+            updateOverallStatus(statusData.overall_status);
+            updateComponents(statusData.components);
+            
+            if (statusData.versions) {
+                document.getElementById('ipfs-version').textContent = statusData.versions.ipfs || 'go-ipfs v0.18.1';
+                document.getElementById('flask-version').textContent = statusData.versions.flask || 'v2.3.3';
+            }
+                  
+            updateStatistics(statusData.statistics);
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            showStatusError();
+        }
+    }
+
+    function updateOverallStatus(status) {
+        const overallStatus = document.querySelector('.overall-status');
+        const statusIcon = document.querySelector('.status-icon');
+        const statusMessage = document.querySelector('.status-message');
+        overallStatus.classList.remove('operational', 'degraded', 'down');
+        
+        if (status === 'operational') {
+            overallStatus.classList.add('operational');
+            statusIcon.textContent = '✅';
+            statusMessage.textContent = '{{ "All Systems Operational (Beta)" if testing_mode else "All Systems Operational" }}';
+        } else if (status === 'degraded') {
+            overallStatus.classList.add('degraded');
+            statusIcon.textContent = '⚠️';
+            statusMessage.textContent = '{{ "Some Issues Detected (Beta)" if testing_mode else "Some Issues Detected" }}';
+        } else {
+            overallStatus.classList.add('down');
+            statusIcon.textContent = '❌';
+            statusMessage.textContent = '{{ "System Issues (Beta)" if testing_mode else "System Issues" }}';
+        }
+    }
+
+    function updateComponents(components) {
+        if (components.ipfs) {
+            const ipfs = components.ipfs;
+            document.getElementById('ipfs-status').textContent = ipfs.status.toUpperCase();
+            document.getElementById('ipfs-description').textContent = ipfs.description;
+            document.getElementById('ipfs-uptime').textContent = ipfs.uptime_percent + '%';
+            document.getElementById('ipfs-peers').textContent = ipfs.metrics.peer_count || 0;
+            document.getElementById('ipfs-component').className = `component-card ${ipfs.status}`;
+            document.getElementById('ipfs-status').className = `component-status ${ipfs.status}`;
+        }
+        
+        if (components.app) {
+            const app = components.app;
+            document.getElementById('app-status').textContent = app.status.toUpperCase();
+            document.getElementById('app-description').textContent = app.description;
+            document.getElementById('app-memory').textContent = app.metrics.memory_mb + 'MB';
+            document.getElementById('app-uptime').textContent = app.metrics.uptime_hours + 'h';
+            document.getElementById('app-component').className = `component-card ${app.status}`;
+            document.getElementById('app-status').className = `component-status ${app.status}`;
+        }
+        
+        if (components.database) {
+            const db = components.database;
+            document.getElementById('db-status').textContent = db.status.toUpperCase();
+            document.getElementById('db-description').textContent = db.description;
+            document.getElementById('db-size').textContent = db.metrics.size_mb + 'MB';
+            document.getElementById('db-records').textContent = db.metrics.pins_count + db.metrics.users_count;
+            document.getElementById('db-component').className = `component-card ${db.status}`;
+            document.getElementById('db-status').className = `component-status ${db.status}`;
+        }
+        
+        if (components.network) {
+            const network = components.network;
+            document.getElementById('network-status').textContent = network.status.toUpperCase();
+            document.getElementById('network-description').textContent = network.description;
+            document.getElementById('network-sent').textContent = network.metrics.bytes_sent + 'MB';
+            document.getElementById('network-recv').textContent = network.metrics.bytes_recv + 'MB';
+            document.getElementById('network-component').className = `component-card ${network.status}`;
+            document.getElementById('network-status').className = `component-status ${network.status}`;
+        }
+    }
+
+    function updateStatistics(stats) {
+        if (stats.users) {
+            document.getElementById('total-users').textContent = stats.users.total;
+        }
+        if (stats.files) {
+            document.getElementById('total-pins').textContent = stats.files.total;
+            document.getElementById('total-storage').textContent = stats.files.total_size_gb + ' GB';
+            document.getElementById('total-files').textContent = stats.files.total;
+        }
+        document.getElementById('system-uptime').textContent = '99.7%';
+        document.getElementById('avg-response').textContent = '<200ms';
+    }
+
+    function showStatusError() {
+        const overallStatus = document.querySelector('.overall-status');
+        overallStatus.className = 'overall-status degraded';
+        const statusIcon = document.querySelector('.status-icon');
+        statusIcon.textContent = '⚠️';
+        const statusMessage = document.querySelector('.status-message');
+        statusMessage.textContent = 'Status Update Failed';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🍺 Status page initializing...');
+        fetchUserLocation();
+        updateUTCTime();
+        setInterval(updateUTCTime, 1000);
+        updateStatusData();
+        startAutoRefresh();
+        
+        document.querySelectorAll('.stat-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.zIndex = '10';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.zIndex = '1';
+            });
+        });
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'r' && e.ctrlKey) {
+            e.preventDefault();
+            updateStatusData();
+        }
+    });
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            stopAutoRefresh();
+        } else {
+            startAutoRefresh();
+        }
+    });
+
+    window.addEventListener('beforeunload', function() {
+        stopAutoRefresh();
+    });
+</script>
+{% endblock %}

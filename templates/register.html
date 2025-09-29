@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}Register - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .register-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #4ECDC4;
+    }
+
+    .register-title {
+        text-align: center;
+        color: #4ECDC4;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .register-subtitle {
+        text-align: center;
+        color: #BDC3C7;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+
+    /* Beta notice */
+    .beta-notice {
+        background: #3498DB;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Form styles */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        color: #ECF0F1;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #95A5A6;
+        border-radius: 10px;
+        background: #2C3E50;
+        color: #ECF0F1;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4ECDC4;
+        box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+    }
+
+    .form-input::placeholder {
+        color: #95A5A6;
+    }
+
+    .form-input.valid {
+        border-color: #27AE60;
+    }
+
+    .form-input.invalid {
+        border-color: #E74C3C;
+    }
+
+    /* Password strength indicator */
+    .password-strength {
+        margin-top: 5px;
+        height: 4px;
+        background: #95A5A6;
+        border-radius: 2px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .password-strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak { background: #E74C3C; }
+    .strength-medium { background: #F39C12; }
+    .strength-strong { background: #27AE60; }
+
+    .password-requirements {
+        font-size: 0.8rem;
+        color: #95A5A6;
+        margin-top: 5px;
+    }
+
+    .password-requirements.valid {
+        color: #27AE60;
+    }
+
+    /* Terms checkbox */
+    .terms-group {
+        display: flex;
+        align-items: flex-start;
+        margin: 25px 0;
+        gap: 10px;
+    }
+
+    .terms-checkbox {
+        margin-top: 3px;
+        transform: scale(1.2);
+    }
+
+    .terms-label {
+        color: #BDC3C7;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .terms-label a {
+        color: #4ECDC4;
+        text-decoration: none;
+    }
+
+    .terms-label a:hover {
+        color: #45B7B8;
+        text-decoration: underline;
+    }
+
+    .terms-error {
+        color: #E74C3C;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    /* Button styles */
+    .register-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .register-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+    }
+
+    .register-btn:disabled {
+        background: #95A5A6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .wallet-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .wallet-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
+    }
+
+    .wallet-btn:disabled {
+        background: #95A5A6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Divider */
+    .auth-divider {
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+        color: #95A5A6;
+    }
+
+    .auth-divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #95A5A6;
+        z-index: 1;
+    }
+
+    .auth-divider span {
+        background: #34495E;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .wallet-warning {
+        background: rgba(230, 126, 34, 0.1);
+        border: 1px solid #E67E22;
+        color: #E67E22;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Footer links */
+    .register-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #95A5A6;
+    }
+
+    .register-footer a {
+        color: #4ECDC4;
+        text-decoration: none;
+        margin: 0 15px;
+        transition: color 0.3s ease;
+    }
+
+    .register-footer a:hover {
+        color: #45B7B8;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Benefits list */
+    .benefits-list {
+        background: rgba(78, 205, 196, 0.1);
+        border: 1px solid #4ECDC4;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .benefits-title {
+        color: #4ECDC4;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .benefits-list ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefits-list li {
+        color: #BDC3C7;
+        margin: 8px 0;
+        padding-left: 20px;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .benefits-list li::before {
+        content: "✅";
+        position: absolute;
+        left: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .register-container {
+            margin: 40px auto;
+        }
+        
+        .register-card {
+            padding: 30px 20px;
+        }
+        
+        .register-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <h1 class="register-title">🍺 Create Account{{ " (BETA)" if testing_mode }}</h1>
+        <p class="register-subtitle">
+            {{ "Join the beta test and help shape ServeBeer!" if testing_mode else "Join the decentralized revolution" }}
+        </p>
+
+        {% if testing_mode %}
+        <div class="beta-notice">
+            🚀 BETA VERSION - Join our testing community and get free access to all features!
+        </div>
+
+        <div class="benefits-list">
+            <div class="benefits-title">Beta Testing Benefits:</div>
+            <ul>
+                <li>Free access to all storage tiers</li>
+                <li>Real IPFS pinning that works</li>
+                <li>Help improve the final product</li>
+                <li>Early access to new features</li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- MetaMask Registration Option -->
+        {% if not testing_mode %}
+        <button class="wallet-btn" onclick="registerWithWallet()">
+            🦊 Register with MetaMask
+        </button>
+        
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+        {% else %}
+        <div class="wallet-warning">
+            ⚠️ Wallet registration coming in official release. Email registration available for beta testing.
+        </div>
+        {% endif %}
+
+        <!-- Email Registration Form -->
+        <form method="POST" id="registerForm">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="form-input" 
+                    placeholder="{{ 'test@example.com (any email for testing)' if testing_mode else 'Enter your email address' }}"
+                    required
+                    autocomplete="email"
+                >
+                <div class="form-feedback" id="emailFeedback"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="Create a strong password"
+                    required
+                    autocomplete="new-password"
+                    minlength="6"
+                >
+                <div class="password-strength">
+                    <div class="password-strength-fill" id="strengthFill"></div>
+                </div>
+                <div class="password-requirements" id="passwordRequirements">
+                    Password must be at least 6 characters long
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password" class="form-label">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirm-password" 
+                    name="confirm-password" 
+                    class="form-input" 
+                    placeholder="Confirm your password"
+                    required
+                    autocomplete="new-password"
+                >
+                <div class="form-feedback" id="confirmFeedback"></div>
+            </div>
+
+            <div class="terms-group">
+                <input 
+                    type="checkbox" 
+                    id="agree_terms" 
+                    name="agree_terms" 
+                    class="terms-checkbox" 
+                    required
+                >
+                <label for="agree_terms" class="terms-label">
+                    I agree to the <a href="{{ url_for('terms_of_service') }}" target="_blank">Terms of Service</a> and 
+                    <a href="{{ url_for('cookie_policy') }}" target="_blank">Cookie Policy</a>{{ " (Beta Version)" if testing_mode }}
+                </label>
+            </div>
+            <div class="terms-error" id="termsError">
+                You must agree to the Terms of Service to register.
+            </div>
+
+            <button type="submit" class="register-btn" id="registerButton" disabled>
+                {{ "Join Beta Testing" if testing_mode else "Create Account" }}
+            </button>
+        </form>
+
+        <div class="register-footer">
+            <a href="{{ url_for('login') }}">
+                {{ "Already have beta account?" if testing_mode else "Already have account?" }}
+            </a>
+            |
+            <a href="{{ url_for('index') }}">Back to home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation and interaction
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registerForm');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const termsCheckbox = document.getElementById('agree_terms');
+        const submitButton = document.getElementById('registerButton');
+        
+        // Password strength checking
+        function checkPasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 6) score++;
+            if (password.length >= 10) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            return Math.min(score, 3);
+        }
+        
+        passwordField.addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            const fill = document.getElementById('strengthFill');
+            const requirements = document.getElementById('passwordRequirements');
+            
+            // Update strength bar
+            fill.style.width = (strength / 3 * 100) + '%';
+            fill.className = 'password-strength-fill strength-' + 
+                (strength <= 1 ? 'weak' : strength === 2 ? 'medium' : 'strong');
+            
+            // Update requirements text
+            if (password.length < 6) {
+                requirements.textContent = 'Password must be at least 6 characters long';
+                requirements.className = 'password-requirements';
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+            } else {
+                requirements.textContent = strength <= 1 ? 'Weak password' : 
+                    strength === 2 ? 'Good password' : 'Strong password';
+                requirements.className = 'password-requirements valid';
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+            }
+            
+            validateForm();
+        });
+        
+        // Confirm password validation
+        confirmPasswordField.addEventListener('input', function() {
+            const feedback = document.getElementById('confirmFeedback');
+            
+            if (this.value !== passwordField.value) {
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+                feedback.textContent = 'Passwords do not match';
+                feedback.style.color = '#E74C3C';
+            } else {
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+                feedback.textContent = 'Passwords match';
+                feedback.style.color = '#27AE60';
+            }
+            
+            validateForm();
+        });
+        
+        // Email validation
+        emailField.addEventListener('input', function() {
+            const feedback = document.getElementById('emailFeedback');
+            
+            if (this.checkValidity()) {
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+                feedback.textContent = '';
+            } else {
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+            }
+            
+            validateForm();
+        });
+        
+        // Terms checkbox
+        termsCheckbox.addEventListener('change', function() {
+            const error = document.getElementById('termsError');
+            
+            if (this.checked) {
+                error.style.display = 'none';
+            } else {
+                error.style.display = 'block';
+            }
+            
+            validateForm();
+        });
+        
+        // Form validation
+        function validateForm() {
+            const isEmailValid = emailField.checkValidity() && emailField.value.length > 0;
+            const isPasswordValid = passwordField.value.length >= 6;
+            const isConfirmValid = confirmPasswordField.value === passwordField.value && confirmPasswordField.value.length > 0;
+            const isTermsAccepted = termsCheckbox.checked;
+            
+            const isFormValid = isEmailValid && isPasswordValid && isConfirmValid && isTermsAccepted;
+            
+            submitButton.disabled = !isFormValid;
+        }
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                document.getElementById('termsError').style.display = 'block';
+                return;
+            }
+            
+            submitButton.classList.add('btn-loading');
+            submitButton.disabled = true;
+        });
+        
+        // Auto-focus email field
+        emailField.focus();
+        
+        // Enter key navigation
+        emailField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                passwordField.focus();
+            }
+        });
+        
+        passwordField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmPasswordField.focus();
+            }
+        });
+        
+        confirmPasswordField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !submitButton.disabled) {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    });
+
+    // MetaMask wallet registration (for production)
+    {% if not testing_mode %}
+    async function registerWithWallet() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                const button = document.querySelector('.wallet-btn');
+                button.classList.add('btn-loading');
+                button.disabled = true;
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // For this demo, we'll show a message since full MetaMask integration requires additional setup
+                showNotification('MetaMask registration coming soon in production release!', 'info');
+                
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            } catch (error) {
+                console.error('MetaMask error:', error);
+                showNotification('MetaMask error: ' + error.message, 'error');
+                
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
+        } else {
+            showNotification('MetaMask not detected! Please install MetaMask extension.', 'error');
+        }
+    }
+    {% endif %}
+
+    // Tips for beta testing
+    {% if testing_mode %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add helpful tip after a delay
+        setTimeout(() => {
+            showNotification('💡 Tip: Use any email address for beta testing - no verification required!', 'info');
+        }, 3000);
+    });
+    {% endif %}
+</script>
+{% endblock %}

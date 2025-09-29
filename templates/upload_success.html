@@ -1,0 +1,662 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Success - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    .success-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #27AE60;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Success animation overlay */
+    .success-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(39, 174, 96, 0.1), transparent);
+        animation: successShimmer 2s ease-out;
+    }
+
+    @keyframes successShimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        animation: successBounce 0.6s ease-out;
+    }
+
+    @keyframes successBounce {
+        0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+        50% { transform: scale(1.2) rotate(-10deg); opacity: 1; }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .success-title {
+        color: #27AE60;
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .success-subtitle {
+        color: #BDC3C7;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    /* File details section */
+    .file-details {
+        background: rgba(39, 174, 96, 0.1);
+        border: 1px solid #27AE60;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: left;
+    }
+
+    .details-title {
+        color: #27AE60;
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #95A5A6;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #ECF0F1;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    /* CID display section */
+    .cid-section {
+        background: #2C3E50;
+        border: 2px solid #4ECDC4;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+    }
+
+    .cid-title {
+        color: #4ECDC4;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .cid-display {
+        background: rgba(0,0,0,0.4);
+        padding: 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        word-break: break-all;
+        font-size: 0.9rem;
+        color: #4ECDC4;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .cid-display:hover {
+        background: rgba(78, 205, 196, 0.1);
+        transform: scale(1.02);
+    }
+
+    .copy-btn {
+        background: #4ECDC4;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        background: #45B7B8;
+        transform: translateY(-2px);
+    }
+
+    /* Access links section */
+    .access-section {
+        background: rgba(52, 152, 219, 0.1);
+        border: 1px solid #3498DB;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+    }
+
+    .access-title {
+        color: #3498DB;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .access-links {
+        display: grid;
+        gap: 15px;
+    }
+
+    .access-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .access-link:hover {
+        background: rgba(52, 152, 219, 0.2);
+        border-color: #3498DB;
+        transform: translateY(-2px);
+    }
+
+    .access-link-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .access-link-icon {
+        font-size: 1.5rem;
+    }
+
+    .access-link-text {
+        color: #ECF0F1;
+        font-weight: 500;
+    }
+
+    .access-link-desc {
+        color: #95A5A6;
+        font-size: 0.8rem;
+    }
+
+    .external-icon {
+        color: #3498DB;
+        font-size: 1.2rem;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 40px 0;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        color: white;
+    }
+
+    .action-btn.secondary {
+        background: linear-gradient(135deg, #95A5A6 0%, #7F8C8D 100%);
+        box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .action-btn.secondary:hover {
+        box-shadow: 0 8px 20px rgba(149, 165, 166, 0.4);
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .action-btn.primary:hover {
+        box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+    }
+
+    /* Beta celebration */
+    .beta-celebration {
+        background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin: 20px 0;
+        animation: celebrate 2s ease-out;
+    }
+
+    @keyframes celebrate {
+        0% { transform: scale(0.9); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .celebration-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Share buttons */
+    .share-section {
+        background: rgba(155, 89, 182, 0.1);
+        border: 1px solid #9B59B6;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .share-title {
+        color: #9B59B6;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .share-btn {
+        padding: 8px 15px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .share-twitter {
+        background: #1DA1F2;
+        color: white;
+    }
+
+    .share-telegram {
+        background: #0088CC;
+        color: white;
+    }
+
+    .share-reddit {
+        background: #FF4500;
+        color: white;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .success-container {
+            margin: 40px auto;
+        }
+        
+        .success-card {
+            padding: 30px 20px;
+        }
+        
+        .success-title {
+            font-size: 1.8rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .detail-value {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-icon">✅</div>
+        <h1 class="success-title">Upload Successful!</h1>
+        <p class="success-subtitle">
+            Your file has been uploaded to IPFS and pinned to our decentralized network. 
+            It's now permanently available across the globe!
+        </p>
+
+        {% if testing_mode %}
+        <div class="beta-celebration">
+            <div class="celebration-title">🚀 Beta Test Success!</div>
+            <p>Thank you for testing our upload functionality! Your file is real and persists on IPFS.</p>
+        </div>
+        {% endif %}
+
+        <!-- File Details -->
+        <div class="file-details">
+            <div class="details-title">📄 File Information</div>
+            <div class="detail-row">
+                <span class="detail-label">Filename:</span>
+                <span class="detail-value">{{ filename }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">File Size:</span>
+                <span class="detail-value">{{ "%.1f"|format(size / 1024) }} KB</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Upload Time:</span>
+                <span class="detail-value">{{ moment().format('YYYY-MM-DD HH:mm:ss') if moment else "Just now" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" style="color: #27AE60;">✅ Pinned & Active</span>
+            </div>
+        </div>
+
+        <!-- IPFS CID -->
+        <div class="cid-section">
+            <h3 class="cid-title">🔗 IPFS Content ID (CID)</h3>
+            <div class="cid-display" onclick="copyToClipboard('{{ cid }}')">
+                {{ cid }}
+            </div>
+            <button class="copy-btn" onclick="copyToClipboard('{{ cid }}')">
+                📋 Copy CID
+            </button>
+            <p style="color: #95A5A6; font-size: 0.8rem; margin-top: 10px;">
+                Click to copy • This is your file's permanent decentralized address
+            </p>
+        </div>
+
+        <!-- Access Links -->
+        <div class="access-section">
+            <h3 class="access-title">🌐 Access Your File</h3>
+            <div class="access-links">
+                <a href="https://ipfs.io/ipfs/{{ cid }}" target="_blank" class="access-link">
+                    <div class="access-link-info">
+                        <div class="access-link-icon">🌍</div>
+                        <div>
+                            <div class="access-link-text">IPFS.io Gateway</div>
+                            <div class="access-link-desc">Official IPFS gateway</div>
+                        </div>
+                    </div>
+                    <div class="external-icon">↗️</div>
+                </a>
+
+                <a href="https://gateway.pinata.cloud/ipfs/{{ cid }}" target="_blank" class="access-link">
+                    <div class="access-link-info">
+                        <div class="access-link-icon">📌</div>
+                        <div>
+                            <div class="access-link-text">Pinata Gateway</div>
+                            <div class="access-link-desc">Fast alternative gateway</div>
+                        </div>
+                    </div>
+                    <div class="external-icon">↗️</div>
+                </a>
+
+                <a href="https://dweb.link/ipfs/{{ cid }}" target="_blank" class="access-link">
+                    <div class="access-link-info">
+                        <div class="access-link-icon">🔗</div>
+                        <div>
+                            <div class="access-link-text">Dweb.link</div>
+                            <div class="access-link-desc">Protocol Labs gateway</div>
+                        </div>
+                    </div>
+                    <div class="external-icon">↗️</div>
+                </a>
+            </div>
+            <p style="color: #95A5A6; font-size: 0.8rem; margin-top: 15px; text-align: center;">
+                Your file is accessible through any IPFS gateway worldwide
+            </p>
+        </div>
+
+        <!-- Share Section -->
+        <div class="share-section">
+            <h3 class="share-title">📢 Share Your Upload</h3>
+            <div class="share-buttons">
+                <a href="https://twitter.com/intent/tweet?text=Just%20uploaded%20to%20IPFS%20via%20%40ServeBeer%20CDN!&url=https://ipfs.io/ipfs/{{ cid }}" 
+                   target="_blank" class="share-btn share-twitter">
+                    🐦 Twitter
+                </a>
+                <a href="https://t.me/share/url?url=https://ipfs.io/ipfs/{{ cid }}&text=Check%20out%20my%20IPFS%20upload%20via%20ServeBeer%20CDN!" 
+                   target="_blank" class="share-btn share-telegram">
+                    ✈️ Telegram
+                </a>
+                <a href="https://reddit.com/submit?url=https://ipfs.io/ipfs/{{ cid }}&title=My%20IPFS%20upload%20via%20ServeBeer%20decentralized%20CDN" 
+                   target="_blank" class="share-btn share-reddit">
+                    🤖 Reddit
+                </a>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{{ url_for('upload_file') }}" class="action-btn primary">
+                📤 Upload Another File
+            </a>
+            <a href="{{ url_for('api_pin') }}" class="action-btn secondary">
+                📌 Pin Another CID
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="action-btn">
+                🏠 Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Copy to clipboard with enhanced feedback
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Visual feedback
+            const cidDisplay = document.querySelector('.cid-display');
+            const originalBg = cidDisplay.style.background;
+            cidDisplay.style.background = 'rgba(39, 174, 96, 0.3)';
+            cidDisplay.style.transform = 'scale(1.05)';
+            
+            showNotification('CID copied to clipboard!', 'success');
+            
+            // Reset visual feedback
+            setTimeout(() => {
+                cidDisplay.style.background = originalBg;
+                cidDisplay.style.transform = 'scale(1)';
+            }, 1000);
+        }).catch(function() {
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showNotification('CID copied to clipboard!', 'success');
+        });
+    }
+
+    // Initialize page interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects to access links
+        document.querySelectorAll('.access-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add click effects to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Auto-select CID on focus (for easier copying)
+        const cidDisplay = document.querySelector('.cid-display');
+        cidDisplay.addEventListener('focus', function() {
+            if (window.getSelection) {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        });
+
+        // Keyboard shortcut for copying CID
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'c' && !window.getSelection().toString()) {
+                e.preventDefault();
+                copyToClipboard('{{ cid }}');
+            }
+        });
+
+        {% if testing_mode %}
+        // Beta testing celebration
+        setTimeout(() => {
+            showNotification('🎉 Beta upload successful! File is live on IPFS network.', 'success');
+        }, 1000);
+
+        // Additional beta testing info
+        setTimeout(() => {
+            console.log('Beta Debug: File uploaded successfully');
+            console.log('CID:', '{{ cid }}');
+            console.log('Size:', '{{ size }}', 'bytes');
+        }, 500);
+        {% endif %}
+
+        // Scroll to CID section after page load
+        setTimeout(() => {
+            document.querySelector('.cid-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }, 1500);
+    });
+
+    // Track access link clicks
+    document.querySelectorAll('.access-link').forEach(link => {
+        link.addEventListener('click', function() {
+            const gateway = this.querySelector('.access-link-text').textContent;
+            console.log(`Accessing file via ${gateway}`);
+            
+            // Show helpful message
+            setTimeout(() => {
+                showNotification(`Opening file via ${gateway}...`, 'info');
+            }, 100);
+        });
+    });
+
+    // Fun confetti effect for beta testing
+    {% if testing_mode %}
+    function createConfetti() {
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.textContent = ['🎉', '🚀', '✨', '🎊', '⭐'][Math.floor(Math.random() * 5)];
+            confetti.style.cssText = `
+                position: fixed;
+                top: -10px;
+                left: ${Math.random() * 100}vw;
+                font-size: ${Math.random() * 20 + 15}px;
+                z-index: 1000;
+                pointer-events: none;
+                animation: confetti-fall ${Math.random() * 3 + 2}s linear forwards;
+            `;
+            
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+    }
+
+    // Add confetti animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Trigger confetti after initial animations
+    setTimeout(createConfetti, 1000);
+    {% endif %}
+</script>
+{% endblock %}

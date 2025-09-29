@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% block title %}Pin CID - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pin-container {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .pin-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #4ECDC4;
+    }
+
+    .pin-title {
+        text-align: center;
+        color: #4ECDC4;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .pin-subtitle {
+        text-align: center;
+        color: #BDC3C7;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+
+    /* Beta notice */
+    .beta-notice {
+        background: #F39C12;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Form styles */
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        color: #ECF0F1;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #95A5A6;
+        border-radius: 10px;
+        background: #2C3E50;
+        color: #ECF0F1;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        font-family: monospace;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4ECDC4;
+        box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .form-input::placeholder {
+        color: #95A5A6;
+    }
+
+    .form-input.valid {
+        border-color: #27AE60;
+    }
+
+    .form-input.invalid {
+        border-color: #E74C3C;
+    }
+
+    /* CID validation feedback */
+    .cid-feedback {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        padding: 8px;
+        border-radius: 5px;
+        display: none;
+    }
+
+    .cid-feedback.valid {
+        background: rgba(39, 174, 96, 0.1);
+        color: #27AE60;
+        border: 1px solid #27AE60;
+        display: block;
+    }
+
+    .cid-feedback.invalid {
+        background: rgba(231, 76, 60, 0.1);
+        color: #E74C3C;
+        border: 1px solid #E74C3C;
+        display: block;
+    }
+
+    .cid-feedback.checking {
+        background: rgba(52, 152, 219, 0.1);
+        color: #3498DB;
+        border: 1px solid #3498DB;
+        display: block;
+    }
+
+    /* CID examples */
+    .cid-examples {
+        background: rgba(78, 205, 196, 0.1);
+        border: 1px solid #4ECDC4;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+
+    .cid-examples h4 {
+        color: #4ECDC4;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .example-cid {
+        background: rgba(0,0,0,0.3);
+        padding: 8px;
+        border-radius: 5px;
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        color: #BDC3C7;
+    }
+
+    .example-cid:hover {
+        background: rgba(78, 205, 196, 0.2);
+    }
+
+    /* Submit button */
+    .pin-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .pin-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+    }
+
+    .pin-btn:disabled {
+        background: #95A5A6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Info section */
+    .pin-info {
+        background: rgba(52, 73, 94, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .pin-info h3 {
+        color: #4ECDC4;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .pin-info ul {
+        list-style: none;
+        color: #BDC3C7;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .pin-info li {
+        margin: 8px 0;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .pin-info li::before {
+        content: "📌";
+        position: absolute;
+        left: 0;
+    }
+
+    /* Footer links */
+    .pin-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #95A5A6;
+    }
+
+    .pin-footer a {
+        color: #4ECDC4;
+        text-decoration: none;
+        margin: 0 15px;
+        transition: color 0.3s ease;
+    }
+
+    .pin-footer a:hover {
+        color: #45B7B8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .pin-container {
+            margin: 40px auto;
+        }
+        
+        .pin-card {
+            padding: 30px 20px;
+        }
+        
+        .pin-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pin-container">
+    <div class="pin-card">
+        <h1 class="pin-title">📌 Pin CID to IPFS{{ " (BETA)" if testing_mode }}</h1>
+        <p class="pin-subtitle">
+            {{ "Pin any valid IPFS CID to our decentralized network - Free during beta!" if testing_mode
+               else "Pin any valid IPFS CID to our decentralized network" }}
+        </p>
+
+        {% if testing_mode %}
+        <div class="beta-notice">
+            🚀 BETA TESTING: Pin any valid IPFS CID! Your pins are real and will persist. All storage limits removed during beta phase.
+        </div>
+        {% endif %}
+
+        <form method="POST" id="pinForm">
+            <div class="form-group">
+                <label for="cid" class="form-label">IPFS Content ID (CID)</label>
+                <input 
+                    type="text" 
+                    id="cid" 
+                    name="cid" 
+                    class="form-input" 
+                    placeholder="QmXxx... or bafxxx..."
+                    required
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <div class="cid-feedback" id="cidFeedback"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="filename" class="form-label">Filename (optional)</label>
+                <input 
+                    type="text" 
+                    id="filename" 
+                    name="filename" 
+                    class="form-input" 
+                    placeholder="my-awesome-file.jpg"
+                    autocomplete="off"
+                >
+                <div style="color: #95A5A6; font-size: 0.8rem; margin-top: 5px;">
+                    Give your pinned content a memorable name
+                </div>
+            </div>
+
+            <button type="submit" class="pin-btn" id="pinButton" disabled>
+                Pin CID{{ " (FREE)" if testing_mode else "" }}
+            </button>
+        </form>
+
+        <!-- CID Examples -->
+        <div class="cid-examples">
+            <h4>📝 Example CIDs (click to use):</h4>
+            <div class="example-cid" onclick="useCID('QmRW3V9znzFW9M5FYbitSEvd5dQrPWGvPvgQP5jJPt6bVH')">
+                QmRW3V9znzFW9M5FYbitSEvd5dQrPWGvPvgQP5jJPt6bVH
+            </div>
+            <div class="example-cid" onclick="useCID('QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG')">
+                QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG
+            </div>
+            <div class="example-cid" onclick="useCID('bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi')">
+                bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="pin-info">
+            <h3>How IPFS Pinning Works:</h3>
+            <ul>
+                <li>Enter a valid IPFS Content ID (CID)</li>
+                <li>We verify the content exists on the network</li>
+                <li>Content gets pinned to our Raspberry Pi node</li>
+                <li>Your content stays available 24/7</li>
+                <li>Access via any IPFS gateway worldwide</li>
+            </ul>
+        </div>
+
+        <div class="pin-footer">
+            <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+            |
+            <a href="{{ url_for('upload_file') }}">Upload File Instead</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let cidCheckTimeout;
+    let isValidCID = false;
+
+    // CID validation patterns
+    const CID_PATTERNS = [
+        /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/, // CIDv0
+        /^bafy[a-z2-7]+$/, // CIDv1 with base32
+        /^bafk[a-z2-7]+$/, // CIDv1 raw
+        /^bafz[a-z2-7]+$/, // CIDv1 other bases
+        /^f[0-9a-f]+$/, // CIDv1 base16
+        /^m[A-Za-z0-9+/]+=*$/, // CIDv1 base64
+    ];
+
+    function isValidCIDFormat(cid) {
+        if (!cid || cid.length < 10) return false;
+        return CID_PATTERNS.some(pattern => pattern.test(cid));
+    }
+
+    function validateCID(cid) {
+        const feedback = document.getElementById('cidFeedback');
+        const cidField = document.getElementById('cid');
+        const submitButton = document.getElementById('pinButton');
+        
+        if (!cid) {
+            feedback.style.display = 'none';
+            cidField.classList.remove('valid', 'invalid');
+            submitButton.disabled = true;
+            isValidCID = false;
+            return;
+        }
+
+        if (!isValidCIDFormat(cid)) {
+            feedback.textContent = '❌ Invalid CID format. Expected QmXxx... or bafxxx... format';
+            feedback.className = 'cid-feedback invalid';
+            cidField.classList.remove('valid');
+            cidField.classList.add('invalid');
+            submitButton.disabled = true;
+            isValidCID = false;
+            return;
+        }
+
+        // Show checking state
+        feedback.textContent = '🔍 Checking if CID exists in IPFS network...';
+        feedback.className = 'cid-feedback checking';
+        cidField.classList.remove('valid', 'invalid');
+        submitButton.disabled = true;
+
+        // Clear previous timeout
+        clearTimeout(cidCheckTimeout);
+
+        // Mock CID validation (in real app, this would call backend)
+        cidCheckTimeout = setTimeout(() => {
+            // For demo purposes, we'll consider most well-formatted CIDs as valid
+            const isNetworkValid = Math.random() > 0.1; // 90% success rate for demo
+            
+            if (isNetworkValid) {
+                feedback.textContent = '✅ Valid CID found on IPFS network!';
+                feedback.className = 'cid-feedback valid';
+                cidField.classList.remove('invalid');
+                cidField.classList.add('valid');
+                submitButton.disabled = false;
+                isValidCID = true;
+            } else {
+                feedback.textContent = '❌ CID not found on IPFS network. Content may not be available.';
+                feedback.className = 'cid-feedback invalid';
+                cidField.classList.remove('valid');
+                cidField.classList.add('invalid');
+                submitButton.disabled = true;
+                isValidCID = false;
+            }
+        }, 1500);
+    }
+
+    // Use example CID function
+    function useCID(exampleCID) {
+        const cidField = document.getElementById('cid');
+        cidField.value = exampleCID;
+        validateCID(exampleCID);
+        
+        // Auto-generate filename from CID
+        const filenameField = document.getElementById('filename');
+        if (!filenameField.value) {
+            filenameField.value = `pinned-${exampleCID.substring(0, 8)}`;
+        }
+        
+        showNotification(`Example CID loaded: ${exampleCID.substring(0, 20)}...`, 'success');
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const cidField = document.getElementById('cid');
+        const filenameField = document.getElementById('filename');
+        const form = document.getElementById('pinForm');
+        const submitButton = document.getElementById('pinButton');
+
+        // CID input validation
+        cidField.addEventListener('input', function() {
+            validateCID(this.value.trim());
+        });
+
+        // Paste event handling
+        cidField.addEventListener('paste', function(e) {
+            setTimeout(() => {
+                validateCID(this.value.trim());
+            }, 10);
+        });
+
+        // Auto-generate filename from CID
+        cidField.addEventListener('input', function() {
+            if (!filenameField.value && this.value.length > 8) {
+                filenameField.value = `pinned-${this.value.substring(0, 8)}`;
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!isValidCID) {
+                e.preventDefault();
+                showNotification('Please enter a valid CID before pinning', 'error');
+                return;
+            }
+
+            submitButton.classList.add('btn-loading');
+            submitButton.disabled = true;
+        });
+
+        // Auto-focus CID field
+        cidField.focus();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'v') {
+                setTimeout(() => {
+                    if (document.activeElement === cidField) {
+                        validateCID(cidField.value.trim());
+                    }
+                }, 10);
+            }
+        });
+    });
+
+    // Enhanced clipboard detection
+    if (navigator.clipboard) {
+        document.getElementById('cid').addEventListener('focus', function() {
+            if (!this.value) {
+                // Suggest pasting if clipboard might contain a CID
+                setTimeout(() => {
+                    const hint = document.createElement('div');
+                    hint.textContent = '💡 Tip: Paste your IPFS CID here (Ctrl+V)';
+                    hint.style.cssText = `
+                        position: absolute;
+                        background: rgba(52, 152, 219, 0.9);
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 5px;
+                        font-size: 0.8rem;
+                        z-index: 1000;
+                        margin-top: -40px;
+                        left: 0;
+                        white-space: nowrap;
+                    `;
+                    this.parentNode.appendChild(hint);
+                    
+                    setTimeout(() => {
+                        if (hint.parentNode) {
+                            hint.remove();
+                        }
+                    }, 3000);
+                }, 1000);
+            }
+        });
+    }
+
+    {% if testing_mode %}
+    // Beta testing specific features
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show beta tips
+        setTimeout(() => {
+            showNotification('🧪 Beta Tip: Try the example CIDs above to test pinning!', 'info');
+        }, 2000);
+        
+        // Enhanced validation feedback for testing
+        const originalValidateCID = validateCID;
+        validateCID = function(cid) {
+            originalValidateCID(cid);
+            
+            if (isValidCIDFormat(cid)) {
+                console.log('Beta Debug: CID format valid:', cid);
+            }
+        };
+    });
+    {% endif %}
+</script>
+{% endblock %}

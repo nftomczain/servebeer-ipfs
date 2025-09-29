@@ -1,0 +1,697 @@
+{% extends "base.html" %}
+
+{% block title %}Upload File - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-container {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .upload-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #4ECDC4;
+    }
+
+    .upload-title {
+        text-align: center;
+        color: #4ECDC4;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .upload-subtitle {
+        text-align: center;
+        color: #BDC3C7;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+
+    /* Beta notice */
+    .beta-notice {
+        background: #F39C12;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Drag & drop upload area */
+    .upload-area {
+        border: 3px dashed #95A5A6;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        background: #2C3E50;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        margin: 20px 0;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+        border-color: #4ECDC4;
+        background: rgba(78, 205, 196, 0.1);
+        box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
+    }
+
+    .upload-area.has-file {
+        border-color: #27AE60;
+        background: rgba(39, 174, 96, 0.1);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #95A5A6;
+        margin-bottom: 20px;
+        transition: color 0.3s ease;
+    }
+
+    .upload-area:hover .upload-icon,
+    .upload-area.dragover .upload-icon {
+        color: #4ECDC4;
+    }
+
+    .upload-area.has-file .upload-icon {
+        color: #27AE60;
+    }
+
+    .upload-text {
+        color: #BDC3C7;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .upload-subtext {
+        color: #95A5A6;
+        font-size: 0.9rem;
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    /* File info display */
+    .file-info {
+        background: rgba(39, 174, 96, 0.1);
+        border: 1px solid #27AE60;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        display: none;
+    }
+
+    .file-info.show {
+        display: block;
+    }
+
+    .file-info-title {
+        color: #27AE60;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .file-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        font-size: 0.9rem;
+    }
+
+    .file-detail {
+        color: #BDC3C7;
+    }
+
+    .file-detail strong {
+        color: #ECF0F1;
+    }
+
+    /* Form styles */
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: block;
+        color: #ECF0F1;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #95A5A6;
+        border-radius: 10px;
+        background: #2C3E50;
+        color: #ECF0F1;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4ECDC4;
+        box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .form-input::placeholder {
+        color: #95A5A6;
+    }
+
+    /* Progress bar */
+    .upload-progress {
+        background: #95A5A6;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .upload-progress.show {
+        display: block;
+    }
+
+    .upload-progress-bar {
+        background: linear-gradient(90deg, #4ECDC4, #45B7B8);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .upload-progress-text {
+        text-align: center;
+        color: #BDC3C7;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+
+    /* Submit button */
+    .upload-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .upload-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+    }
+
+    .upload-btn:disabled {
+        background: #95A5A6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Info section */
+    .upload-info {
+        background: rgba(52, 73, 94, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .upload-info h3 {
+        color: #4ECDC4;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .upload-info ul {
+        list-style: none;
+        color: #BDC3C7;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .upload-info li {
+        margin: 8px 0;
+        padding-left: 20px;
+        position: relative;
+    }
+
+    .upload-info li::before {
+        content: "📤";
+        position: absolute;
+        left: 0;
+    }
+
+    /* File type restrictions */
+    .file-restrictions {
+        background: rgba(230, 126, 34, 0.1);
+        border: 1px solid #E67E22;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+
+    .file-restrictions h4 {
+        color: #E67E22;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .allowed-types {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px 0;
+    }
+
+    .file-type-tag {
+        background: rgba(231, 76, 60, 0.2);
+        color: #E74C3C;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .file-type-tag.allowed {
+        background: rgba(39, 174, 96, 0.2);
+        color: #27AE60;
+    }
+
+    /* Footer links */
+    .upload-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #95A5A6;
+    }
+
+    .upload-footer a {
+        color: #4ECDC4;
+        text-decoration: none;
+        margin: 0 15px;
+        transition: color 0.3s ease;
+    }
+
+    .upload-footer a:hover {
+        color: #45B7B8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .upload-container {
+            margin: 40px auto;
+        }
+        
+        .upload-card {
+            padding: 30px 20px;
+        }
+        
+        .upload-title {
+            font-size: 1.5rem;
+        }
+        
+        .upload-area {
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <h1 class="upload-title">📤 Upload File to IPFS{{ " (BETA)" if testing_mode }}</h1>
+        <p class="upload-subtitle">
+            {{ "Upload any file to IPFS network - Free during beta testing!" if testing_mode
+               else "Upload files directly to IPFS and get permanent decentralized storage" }}
+        </p>
+
+        {% if testing_mode %}
+        <div class="beta-notice">
+            🚀 BETA TESTING: Upload any file to IPFS! Files are added to the network and automatically pinned.
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            <!-- Drag & Drop Upload Area -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon" id="uploadIcon">📁</div>
+                <div class="upload-text" id="uploadText">Drag & drop your file here</div>
+                <div class="upload-subtext">or click to browse files</div>
+                <input type="file" name="file" id="fileInput" class="file-input" required>
+            </div>
+
+            <!-- File Info Display -->
+            <div class="file-info" id="fileInfo">
+                <div class="file-info-title">📄 Selected File:</div>
+                <div class="file-details" id="fileDetails"></div>
+            </div>
+
+            <!-- Upload Progress -->
+            <div class="upload-progress" id="uploadProgress">
+                <div class="upload-progress-bar" id="progressBar"></div>
+                <div class="upload-progress-text" id="progressText">Uploading... 0%</div>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Description (optional)</label>
+                <input 
+                    type="text" 
+                    id="description" 
+                    name="description" 
+                    class="form-input" 
+                    placeholder="Describe your file..."
+                    autocomplete="off"
+                >
+                <div style="color: #95A5A6; font-size: 0.8rem; margin-top: 5px;">
+                    This will be used as the filename in your dashboard
+                </div>
+            </div>
+
+            <button type="submit" class="upload-btn" id="uploadButton" disabled>
+                Upload to IPFS{{ " (FREE)" if testing_mode else "" }}
+            </button>
+        </form>
+
+        <!-- File Restrictions -->
+        <div class="file-restrictions">
+            <h4>📋 File Guidelines:</h4>
+            <p style="color: #BDC3C7; font-size: 0.9rem; margin-bottom: 10px;">
+                {{ "All file types allowed during beta testing." if testing_mode
+                   else "Most common file types are supported:" }}
+            </p>
+            <div class="allowed-types">
+                <span class="file-type-tag allowed">Images (JPG, PNG, GIF, WebP)</span>
+                <span class="file-type-tag allowed">Documents (PDF, TXT, MD)</span>
+                <span class="file-type-tag allowed">Audio (MP3, WAV, OGG)</span>
+                <span class="file-type-tag allowed">Video (MP4, WebM)</span>
+                <span class="file-type-tag allowed">Archives (ZIP, TAR)</span>
+                <span class="file-type-tag allowed">Code (JS, PY, HTML)</span>
+            </div>
+            <p style="color: #95A5A6; font-size: 0.8rem; margin-top: 10px;">
+                Maximum size: {{ "Unlimited during beta" if testing_mode else "Based on your tier" }}
+            </p>
+        </div>
+
+        <!-- Info Section -->
+        <div class="upload-info">
+            <h3>How File Upload Works:</h3>
+            <ul>
+                <li>Files are uploaded directly to IPFS network</li>
+                <li>Automatically pinned to our Raspberry Pi nodes</li>
+                <li>You get a permanent Content ID (CID)</li>
+                <li>{{ "No size limits during beta testing" if testing_mode else "Respects your storage tier limits" }}</li>
+                <li>Access your files from any IPFS gateway</li>
+                <li>Files remain available as long as they're pinned</li>
+            </ul>
+        </div>
+
+        <div class="upload-footer">
+            <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+            |
+            <a href="{{ url_for('api_pin') }}">Pin CID Instead</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedFile = null;
+
+    // File size formatter
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Get file type category
+    function getFileCategory(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const categories = {
+            'Images': ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'],
+            'Documents': ['pdf', 'txt', 'doc', 'docx', 'md', 'rtf'],
+            'Audio': ['mp3', 'wav', 'ogg', 'flac', 'm4a'],
+            'Video': ['mp4', 'webm', 'avi', 'mov', 'mkv'],
+            'Archives': ['zip', 'tar', 'gz', '7z', 'rar'],
+            'Code': ['js', 'py', 'html', 'css', 'json', 'xml'],
+        };
+        
+        for (const [category, exts] of Object.entries(categories)) {
+            if (exts.includes(ext)) {
+                return category;
+            }
+        }
+        return 'Other';
+    }
+
+    // Display file information
+    function displayFileInfo(file) {
+        const fileInfo = document.getElementById('fileInfo');
+        const fileDetails = document.getElementById('fileDetails');
+        const descriptionField = document.getElementById('description');
+        const submitButton = document.getElementById('uploadButton');
+        
+        const category = getFileCategory(file.name);
+        const categoryEmoji = {
+            'Images': '🖼️',
+            'Documents': '📄',
+            'Audio': '🎵',
+            'Video': '🎬',
+            'Archives': '📦',
+            'Code': '💻',
+            'Other': '📁'
+        }[category];
+
+        fileDetails.innerHTML = `
+            <div class="file-detail"><strong>Name:</strong> ${file.name}</div>
+            <div class="file-detail"><strong>Size:</strong> ${formatFileSize(file.size)}</div>
+            <div class="file-detail"><strong>Type:</strong> ${categoryEmoji} ${category}</div>
+            <div class="file-detail"><strong>Modified:</strong> ${new Date(file.lastModified).toLocaleDateString()}</div>
+        `;
+        
+        fileInfo.classList.add('show');
+        
+        // Auto-fill description if empty
+        if (!descriptionField.value) {
+            descriptionField.value = file.name;
+        }
+        
+        // Enable submit button
+        submitButton.disabled = false;
+        selectedFile = file;
+    }
+
+    // Update upload area appearance
+    function updateUploadArea(hasFile = false) {
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadIcon = document.getElementById('uploadIcon');
+        const uploadText = document.getElementById('uploadText');
+        
+        if (hasFile) {
+            uploadArea.classList.add('has-file');
+            uploadIcon.textContent = '✅';
+            uploadText.textContent = 'File selected successfully!';
+        } else {
+            uploadArea.classList.remove('has-file');
+            uploadIcon.textContent = '📁';
+            uploadText.textContent = 'Drag & drop your file here';
+        }
+    }
+
+    // Simulate upload progress (for demo)
+    function simulateUploadProgress() {
+        const progress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        progress.classList.add('show');
+        
+        let currentProgress = 0;
+        const interval = setInterval(() => {
+            currentProgress += Math.random() * 15;
+            if (currentProgress >= 100) {
+                currentProgress = 100;
+                clearInterval(interval);
+                progressText.textContent = 'Upload complete! Processing...';
+            } else {
+                progressText.textContent = `Uploading... ${Math.round(currentProgress)}%`;
+            }
+            progressBar.style.width = currentProgress + '%';
+        }, 200);
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const form = document.getElementById('uploadForm');
+        const submitButton = document.getElementById('uploadButton');
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                displayFileInfo(this.files[0]);
+                updateUploadArea(true);
+            }
+        });
+
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                // Manually set the file to input
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                fileInput.files = dt.files;
+                
+                displayFileInfo(files[0]);
+                updateUploadArea(true);
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!selectedFile) {
+                e.preventDefault();
+                showNotification('Please select a file to upload', 'error');
+                return;
+            }
+
+            submitButton.classList.add('btn-loading');
+            submitButton.disabled = true;
+            simulateUploadProgress();
+        });
+
+        // Click on upload area to trigger file input
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Prevent clicking on file input from bubbling
+        fileInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    {% if testing_mode %}
+    // Beta testing specific features
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show beta tips
+        setTimeout(() => {
+            showNotification('🧪 Beta Tip: Try uploading any file type - all restrictions removed during testing!', 'info');
+        }, 2000);
+        
+        // Mock file size warning removal
+        console.log('Beta Mode: File size limits disabled for testing');
+    });
+    {% endif %}
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'o') {
+            e.preventDefault();
+            document.getElementById('fileInput').click();
+        }
+    });
+
+    // Paste support for images
+    document.addEventListener('paste', function(e) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = items[i].getAsFile();
+                
+                // Create a new file with proper name
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const newFile = new File([file], `pasted-image-${timestamp}.png`, {
+                    type: file.type,
+                    lastModified: Date.now()
+                });
+                
+                // Manually set to input
+                const dt = new DataTransfer();
+                dt.items.add(newFile);
+                document.getElementById('fileInput').files = dt.files;
+                
+                displayFileInfo(newFile);
+                updateUploadArea(true);
+                
+                showNotification('Image pasted from clipboard!', 'success');
+                break;
+            }
+        }
+    });
+</script>
+{% endblock %}

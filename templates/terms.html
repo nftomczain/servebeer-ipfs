@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .terms-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .terms-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #4ECDC4;
+        line-height: 1.7;
+    }
+
+    .terms-title {
+        color: #4ECDC4;
+        font-size: 2.2rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: #95A5A6;
+        margin-bottom: 30px;
+        font-style: italic;
+    }
+
+    /* Beta disclaimer */
+    .beta-disclaimer {
+        background: #3498DB;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 5px solid #2980B9;
+    }
+
+    .beta-disclaimer h3 {
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .beta-disclaimer p {
+        margin-bottom: 10px;
+    }
+
+    .beta-disclaimer strong {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* Section styling */
+    .section {
+        margin: 30px 0;
+        padding: 25px;
+        background: rgba(52, 73, 94, 0.5);
+        border-radius: 15px;
+        border-left: 4px solid #4ECDC4;
+    }
+
+    .section h2 {
+        color: #4ECDC4;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section p {
+        color: #BDC3C7;
+        margin-bottom: 15px;
+    }
+
+    .section ul {
+        color: #BDC3C7;
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .section li {
+        margin: 8px 0;
+        padding-left: 5px;
+    }
+
+    .section li::marker {
+        color: #4ECDC4;
+    }
+
+    /* Important notices */
+    .important-notice {
+        background: #E74C3C;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        border-left: 5px solid #C0392B;
+    }
+
+    .important-notice strong {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+    }
+
+    /* Links styling */
+    .section a {
+        color: #4ECDC4;
+        text-decoration: none;
+        border-bottom: 1px dotted #4ECDC4;
+        transition: all 0.3s ease;
+    }
+
+    .section a:hover {
+        color: #45B7B8;
+        border-bottom-color: #45B7B8;
+    }
+
+    /* Table of contents */
+    .toc {
+        background: rgba(78, 205, 196, 0.1);
+        border: 1px solid #4ECDC4;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 30px 0;
+    }
+
+    .toc h3 {
+        color: #4ECDC4;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .toc ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .toc li {
+        margin: 8px 0;
+    }
+
+    .toc a {
+        color: #BDC3C7;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: block;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .toc a:hover {
+        color: #4ECDC4;
+        background: rgba(78, 205, 196, 0.1);
+    }
+
+    /* Contact section */
+    .contact-section {
+        background: linear-gradient(135deg, rgba(155, 89, 182, 0.1) 0%, rgba(142, 68, 173, 0.1) 100%);
+        border: 2px solid #9B59B6;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin: 40px 0;
+    }
+
+    .contact-section h3 {
+        color: #9B59B6;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .contact-section p {
+        color: #BDC3C7;
+        margin-bottom: 10px;
+    }
+
+    /* Footer navigation */
+    .terms-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #34495E;
+    }
+
+    .terms-footer a {
+        color: #4ECDC4;
+        text-decoration: none;
+        margin: 0 20px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .terms-footer a:hover {
+        color: #45B7B8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .terms-container {
+            margin: 40px auto;
+        }
+        
+        .terms-card {
+            padding: 25px 20px;
+        }
+        
+        .terms-title {
+            font-size: 1.8rem;
+        }
+        
+        .section {
+            padding: 20px 15px;
+        }
+        
+        .terms-footer a {
+            display: block;
+            margin: 10px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <div class="terms-card">
+        <h1 class="terms-title">Terms of Service{{ " (BETA)" if testing_mode }}</h1>
+        <p class="last-updated">Last updated: {{ moment().format('YYYY-MM-DD') if moment else "2025-01-01" }}</p>
+
+        {% if testing_mode %}
+        <div class="beta-disclaimer">
+            <h3>🚀 BETA VERSION TERMS</h3>
+            <p>These terms apply to the beta testing phase. The service is fully functional with all features unlocked for testing purposes. Your pinned content persists normally.</p>
+            <p><strong>Beta Phase:</strong> All premium features are free during beta. Final terms will be presented before production launch.</p>
+            <p><strong>Testing Purpose:</strong> Help us improve ServeBeer by reporting bugs and providing feedback.</p>
+        </div>
+        {% endif %}
+
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h3>📋 Table of Contents</h3>
+            <ul>
+                <li><a href="#service-description">1. Service Description</a></li>
+                <li><a href="#user-responsibilities">2. User Responsibilities</a></li>
+                <li><a href="#prohibited-content">3. Prohibited Content</a></li>
+                <li><a href="#service-limits">4. Service Limits</a></li>
+                <li><a href="#content-removal">5. Content Removal</a></li>
+                <li><a href="#limitation-liability">6. Limitation of Liability</a></li>
+                <li><a href="#privacy">7. Privacy</a></li>
+                <li><a href="#account-termination">8. Account Termination</a></li>
+                <li><a href="#changes-terms">9. Changes to Terms</a></li>
+                <li><a href="#contact">10. Contact</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="section" id="service-description">
+            <h2>🛠️ 1. Service Description</h2>
+            <p>ServeBeer provides IPFS (InterPlanetary File System) content pinning services. We operate as a technical infrastructure provider for decentralized content storage.</p>
+            <p><strong>What we do:</strong></p>
+            <ul>
+                <li>Pin IPFS content to distributed Raspberry Pi nodes</li>
+                <li>Provide file upload directly to IPFS network</li>
+                <li>Maintain decentralized infrastructure through community sponsorship</li>
+                <li>Enable access to content via multiple IPFS gateways</li>
+            </ul>
+            <p><strong>What we don't do:</strong></p>
+            <ul>
+                <li>Store content on centralized servers</li>
+                <li>Moderate or review user content</li>
+                <li>Guarantee permanent storage (depends on network)</li>
+                <li>Provide customer support like traditional cloud services</li>
+            </ul>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section" id="user-responsibilities">
+            <h2>👤 2. User Responsibilities</h2>
+            <div class="important-notice">
+                <strong>IMPORTANT:</strong> You are solely responsible for the legality of content you pin through our service.
+            </div>
+            <p><strong>You must:</strong></p>
+            <ul>
+                <li>Comply with all applicable laws in your jurisdiction</li>
+                <li>Respect intellectual property rights</li>
+                <li>Use the service for lawful purposes only</li>
+                <li>Maintain the security of your account credentials</li>
+                <li>Report any security vulnerabilities responsibly</li>
+            </ul>
+            <p><strong>You must not:</strong></p>
+            <ul>
+                <li>Pin illegal, harmful, or infringing content</li>
+                <li>Use the service for malicious purposes</li>
+                <li>Attempt to circumvent storage limits or restrictions</li>
+                <li>Share your account credentials with others</li>
+                <li>Abuse the service infrastructure or other users</li>
+            </ul>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section" id="prohibited-content">
+            <h2>🚫 3. Prohibited Content</h2>
+            <p>The following content is strictly prohibited and will result in immediate account termination:</p>
+            <ul>
+                <li><strong>Illegal material</strong> as defined by applicable law</li>
+                <li><strong>Copyright infringement</strong> - content that violates intellectual property rights</li>
+                <li><strong>Malware and harmful code</strong> - viruses, trojans, or malicious software</li>
+                <li><strong>Privacy violations</strong> - personal information without consent</li>
+                <li><strong>Harassment content</strong> - material promoting harm to individuals or groups</li>
+                <li><strong>Spam and abuse</strong> - excessive or repetitive content designed to abuse the system</li>
+            </ul>
+            <p><strong>Content Responsibility:</strong> Since IPFS is a content-addressed system, we cannot preview or moderate content before it's pinned. Users are responsible for ensuring their content complies with these terms.</p>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section" id="service-limits">
+            <h2>📊 4. Service Limits</h2>
+            {% if testing_mode %}
+            <div style="background: rgba(52, 152, 219, 0.1); border: 1px solid #3498DB; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <strong style="color: #3498DB;">Beta Testing:</strong> All storage limits are removed during beta phase for testing purposes.
+            </div>
+            {% endif %}
+            <p><strong>Storage Tiers:</strong></p>
+            <ul>
+                <li><strong>Free tier:</strong> {{ "Unlimited (beta)" if testing_mode else "250MB storage limit" }}</li>
+                <li><strong>Paid tier:</strong> {{ "Unlimited (beta)" if testing_mode else "As specified in your plan" }}</li>
+                <li><strong>Service availability:</strong> Best-effort uptime (typically 99%+)</li>
+                <li><strong>Rate limits:</strong> {{ "Removed (beta)" if testing_mode else "May be imposed to prevent abuse" }}</li>
+            </ul>
+            <p><strong>Fair Use Policy:</strong></p>
+            <ul>
+                <li>{{ "Test responsibly - don't abuse the beta service" if testing_mode else "Use resources reasonably and don't abuse the service" }}</li>
+                <li>Commercial use requires appropriate tier subscription</li>
+                <li>Excessive usage may result in throttling or account review</li>
+            </ul>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="section" id="content-removal">
+            <h2>🗑️ 5. Content Removal</h2>
+            <p>We reserve the right to remove content that:</p>
+            <ul>
+                <li>Violates these Terms of Service</li>
+                <li>Is subject to valid legal notice (DMCA, court order, etc.)</li>
+                <li>Threatens service stability or security</li>
+                <li>Violates applicable laws or regulations</li>
+            </ul>
+            <p><strong>Removal Process:</strong></p>
+            <ul>
+                <li>Content is unpinned from our nodes immediately</li>
+                <li>User is notified via email when possible</li>
+                <li>Content may still exist on other IPFS nodes globally</li>
+                <li>Users can appeal removals through our contact process</li>
+            </ul>
+            <div class="important-notice">
+                <strong>Note:</strong> Removing content from our nodes doesn't guarantee removal from the entire IPFS network.
+            </div>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="section" id="limitation-liability">
+            <h2>⚖️ 6. Limitation of Liability</h2>
+            <p>ServeBeer is provided <strong>"AS IS"</strong> without warranties of any kind.</p>
+            <p><strong>We are not liable for:</strong></p>
+            <ul>
+                <li>Content availability or permanence</li>
+                <li>User-generated content and its consequences</li>
+                <li>Service interruptions or downtime</li>
+                <li>Data loss or corruption</li>
+                <li>Third-party actions or IPFS network issues</li>
+                <li>Indirect, incidental, or consequential damages</li>
+            </ul>
+            <p><strong>Maximum Liability:</strong> Our total liability is limited to the amount you paid for the service in the past 12 months.</p>
+            {% if testing_mode %}
+            <div style="background: rgba(243, 156, 18, 0.1); border: 1px solid #F39C12; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <strong style="color: #F39C12;">Beta Limitation:</strong> During beta testing, our liability is further limited as this is a test service.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Section 7 -->
+        <div class="section" id="privacy">
+            <h2>🔒 7. Privacy</h2>
+            <p>We collect minimal data necessary for service operation:</p>
+            <ul>
+                <li><strong>Account information:</strong> Email address or wallet address</li>
+                <li><strong>Usage data:</strong> Storage usage, pinned CIDs, timestamps</li>
+                <li><strong>Technical logs:</strong> IP addresses, error logs, security events</li>
+            </ul>
+            <p><strong>We do NOT:</strong></p>
+            <ul>
+                <li>Track your browsing behavior</li>
+                <li>Sell your data to third parties</li>
+                <li>Store or analyze your file content</li>
+                <li>Require KYC or identity verification</li>
+            </ul>
+            <p>For complete details, see our <a href="{{ url_for('cookie_policy') }}">Cookie Policy</a>.</p>
+        </div>
+
+        <!-- Section 8 -->
+        <div class="section" id="account-termination">
+            <h2>🚪 8. Account Termination</h2>
+            <p><strong>We may terminate accounts that:</strong></p>
+            <ul>
+                <li>Violate these Terms of Service</li>
+                <li>Engage in abusive or illegal behavior</li>
+                <li>Fail to pay subscription fees (for paid accounts)</li>
+                <li>Remain inactive for extended periods</li>
+            </ul>
+            <p><strong>User-initiated termination:</strong></p>
+            <ul>
+                <li>Users may delete their accounts at any time</li>
+                <li>Content will be unpinned from our nodes</li>
+                <li>Account data will be deleted within 30 days</li>
+                <li>{{ "Beta accounts can be deleted immediately" if testing_mode else "Paid subscriptions will be cancelled" }}</li>
+            </ul>
+        </div>
+
+        <!-- Section 9 -->
+        <div class="section" id="changes-terms">
+            <h2>📝 9. Changes to Terms</h2>
+            <p>We may update these terms as our service evolves:</p>
+            <ul>
+                <li>Users will be notified of significant changes via email</li>
+                <li>Continued use constitutes acceptance of updated terms</li>
+                <li>Users who disagree may terminate their accounts</li>
+                <li>Changes become effective 30 days after notification</li>
+            </ul>
+            {% if testing_mode %}
+            <div style="background: rgba(155, 89, 182, 0.1); border: 1px solid #9B59B6; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <strong style="color: #9B59B6;">Beta Updates:</strong> Terms may change more frequently during beta testing as we refine the service.
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Section 10 -->
+        <div class="section" id="contact">
+            <h2>📞 10. Contact</h2>
+            <p>For questions about these terms or the service:</p>
+            <ul>
+                <li><strong>General questions:</strong> Create an issue on our GitHub repository</li>
+                <li><strong>Legal matters:</strong> Contact through official channels</li>
+                <li><strong>Security issues:</strong> Report privately through responsible disclosure</li>
+                <li><strong>{{ "Beta feedback" if testing_mode else "Support requests" }}:</strong> Use the contact form on our website</li>
+            </ul>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h3>💬 Need Help?</h3>
+            <p>Questions about these terms? We're here to help!</p>
+            <p style="margin-top: 15px;">
+                <strong>🌐 Website:</strong> <a href="{{ url_for('index') }}" style="color: #9B59B6;">ServeBeer.com</a><br>
+                <strong>📧 GitHub:</strong> <a href="https://github.com/nftomczain/servebeer-ipfs" style="color: #9B59B6;">@nftomczain/servebeer-ipfs</a><br>
+                <strong>🔗 ENS:</strong> <a href="https://nftomczain.eth.link" style="color: #9B59B6;">nftomczain.eth</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="terms-footer">
+            <a href="{{ url_for('index') }}">← Back to Home</a>
+            <a href="{{ url_for('cookie_policy') }}">Cookie Policy</a>
+            <a href="{{ url_for('sponsors_page') }}">Sponsor Tiers</a>
+        </div>
+
+        <!-- NFTomczain Universe footer -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #34495E; color: #95A5A6; font-size: 0.9em;">
+            <p><strong>Part of the NFTomczain Universe</strong></p>
+            <p style="font-style: italic;">"🔥 We are the fire beneath the ashes. 🌍 We build the ghost layer."</p>
+            <p>&copy; 2025 NFTomczain & NetNeroJes | Guerrilla Infrastructure | 0x660C</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scroll for table of contents links
+    document.querySelectorAll('.toc a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                
+                // Highlight the target section briefly
+                targetElement.style.background = 'rgba(78, 205, 196, 0.1)';
+                setTimeout(() => {
+                    targetElement.style.background = '';
+                }, 2000);
+            }
+        });
+    });
+
+    // Reading progress indicator
+    function updateReadingProgress() {
+        const article = document.querySelector('.terms-card');
+        const articleTop = article.offsetTop;
+        const articleHeight = article.offsetHeight;
+        const scrollTop = window.pageYOffset;
+        const windowHeight = window.innerHeight;
+        
+        const progress = Math.min(
+            Math.max((scrollTop - articleTop + windowHeight / 2) / articleHeight, 0), 
+            1
+        );
+        
+        // Create progress bar if it doesn't exist
+        let progressBar = document.getElementById('reading-progress');
+        if (!progressBar) {
+            progressBar = document.createElement('div');
+            progressBar.id = 'reading-progress';
+            progressBar.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: ${progress * 100}%;
+                height: 3px;
+                background: linear-gradient(90deg, #4ECDC4, #45B7B8);
+                z-index: 1000;
+                transition: width 0.3s ease;
+            `;
+            document.body.appendChild(progressBar);
+        }
+        
+        progressBar.style.width = (progress * 100) + '%';
+    }
+
+    // Update progress on scroll
+    window.addEventListener('scroll', updateReadingProgress);
+    updateReadingProgress(); // Initial call
+
+    {% if testing_mode %}
+    // Beta testing specific features
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add beta testing reminder
+        setTimeout(() => {
+            showNotification('📋 Beta Terms: These terms apply during testing phase only.', 'info');
+        }, 3000);
+        
+        // Highlight beta-specific sections
+        document.querySelectorAll('.beta-disclaimer, [style*="rgba(52, 152, 219"]').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+    {% endif %}
+
+    // Print-friendly version
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'p') {
+            const printStyles = document.createElement('style');
+            printStyles.textContent = `
+                @media print {
+                    body { background: white !important; color: black !important; }
+                    .terms-card { background: white !important; box-shadow: none !important; border: 1px solid black !important; }
+                    .section { background: #f9f9f9 !important; border-left: 2px solid #333 !important; }
+                    .beta-disclaimer { background: #e0e0e0 !important; color: black !important; }
+                    a { color: black !important; }
+                    .terms-footer { display: none; }
+                    #reading-progress { display: none; }
+                }
+            `;
+            document.head.appendChild(printStyles);
+        }
+    });
+</script>
+{% endblock %}

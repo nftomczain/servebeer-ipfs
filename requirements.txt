@@ -1,0 +1,19 @@
+# ServeBeer IPFS CDN - Python Dependencies
+Flask==2.3.3
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Development dependencies
+pytest==7.4.2
+pytest-flask==1.2.0
+black==23.9.1
+flake8==6.1.0
+
+# Optional: Enhanced crypto support (uncomment if needed)
+# eth-account==0.9.0
+# web3==6.11.1
+psutil>=5.9.0
+
+# Production server
+gunicorn==21.2.0
+waitress==2.1.2

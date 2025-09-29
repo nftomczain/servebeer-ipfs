@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ServeBeer - Community-Sponsored IPFS Storage{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}">
+
+    <!-- Meta tags -->
+    <meta name="description" content="{% block description %}Decentralized file hosting powered by Raspberry Pi infrastructure and crypto community support{% endblock %}">
+    <meta name="keywords" content="IPFS, decentralized, storage, crypto, raspberry pi, web3, blockchain">
+    <meta name="author" content="NFTomczain & NetNeroJes">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}ServeBeer IPFS CDN{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Community-Sponsored IPFS Storage{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ url_for('static', filename='img/logo.png') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Base styles that work without external CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+            color: #ECF0F1;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Beta Banner */
+        .beta-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            z-index: 9999;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .beta-banner + * {
+            margin-top: 50px;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(26, 188, 156, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #4ECDC4;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: #4ECDC4;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #ECF0F1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #4ECDC4;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4ECDC4 0%, #45B7B8 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .btn.secondary {
+            background: transparent;
+            border: 2px solid #4ECDC4;
+            color: #4ECDC4;
+        }
+        
+        .btn.secondary:hover {
+            background: #4ECDC4;
+            color: white;
+        }
+        
+        /* Flash messages */
+        .flash-messages {
+            margin: 20px 0;
+        }
+        
+        .flash-message {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+        
+        .flash-message.error {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: #E74C3C;
+            color: #E74C3C;
+        }
+        
+        .flash-message.success {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: #27AE60;
+            color: #27AE60;
+        }
+        
+        .flash-message.info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: #3498DB;
+            color: #3498DB;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #2C3E50;
+            padding: 40px 0;
+            margin-top: 80px;
+            border-top: 1px solid #34495E;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-section h3 {
+            color: #4ECDC4;
+            margin-bottom: 15px;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin: 8px 0;
+        }
+        
+        .footer-section ul li a {
+            color: #BDC3C7;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #4ECDC4;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #34495E;
+            padding-top: 20px;
+            text-align: center;
+            color: #95A5A6;
+            font-size: 0.9em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Beta Banner -->
+    {% if testing_mode %}
+    <div class="beta-banner">
+        🚀 BETA VERSION - Fully functional IPFS service | Help test before official launch! 🚀
+    </div>
+    {% endif %}
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-container">
+                <a href="{{ url_for('index') }}" class="logo">
+                    <div class="logo-icon">🍺</div>
+                    <div class="logo-text">ServeBeer</div>
+                    {% if testing_mode %}<span style="font-size: 0.8em; color: #F39C12;"> BETA</span>{% endif %}
+                </a>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('sponsors_page') }}">Sponsors</a></li>
+                        {% if session.user_id %}
+                            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('login') }}" class="btn">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <div class="container">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flash-message error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ServeBeer</h3>
+                    <p>Community-sponsored IPFS storage powered by Raspberry Pi infrastructure and crypto community support.</p>
+                    <p style="margin-top: 15px; font-style: italic;">"From algorithm to program"</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><a href="#features">IPFS Pinning</a></li>
+                        <li><a href="#features">File Upload</a></li>
+                        <li><a href="#features">Crypto Payments</a></li>
+                        <li><a href="#features">Decentralized CDN</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Community</h3>
+                    <ul>
+                        <li><a href="{{ url_for('sponsors_page') }}">Become a Sponsor</a></li>
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="{{ url_for('terms_of_service') }}">Terms of Service</a></li>
+                        <li><a href="{{ url_for('cookie_policy') }}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>NFTomczain Universe</h3>
+                    <ul>
+                        <li><a href="https://manifestum.nftomczain.eth.link">NFTomczain Manifest</a></li>
+                        <li><a href="https://paragraph.com/@netnerojs-manifesto-disabled-revolution/netneroje-manifesto-disabled-revolution">NetNeroJes Network</a></li>
+                        <li><a href="https://pi-grade.nftomczain.eth.link">Pi-Grade Project</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 NFTomczain & NetNeroJes | "🔥 We are the fire beneath the ashes. 🌍 We build the ghost layer." | 0x660C</p>
+                {% if testing_mode %}
+                <p style="color: #F39C12; font-weight: bold; margin-top: 10px;">BETA VERSION - {{ "Testing Mode Active" }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Base JavaScript -->
+    <script>
+        // Simple utility functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `flash-message ${type}`;
+            notification.textContent = message;
+            
+            const container = document.querySelector('.flash-messages');
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+// Copy to clipboard function
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Copied to clipboard!', 'success');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+            
+            function fallbackCopy(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('Copied to clipboard!', 'success');
+            }
+        }
+        
+        // Auto-hide flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

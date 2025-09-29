@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+
+{% block title %}Cookie Policy - ServeBeer{{ " (BETA)" if testing_mode }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cookies-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 0 20px;
+    }
+
+    .cookies-card {
+        background: #34495E;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 2px solid #4ECDC4;
+        line-height: 1.7;
+    }
+
+    .cookies-title {
+        color: #4ECDC4;
+        font-size: 2.2rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .last-updated {
+        text-align: center;
+        color: #95A5A6;
+        margin-bottom: 30px;
+        font-style: italic;
+    }
+
+    /* Beta notice */
+    .beta-notice {
+        background: #F39C12;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Introduction */
+    .intro-section {
+        background: rgba(78, 205, 196, 0.1);
+        border: 1px solid #4ECDC4;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+    }
+
+    .intro-section h2 {
+        color: #4ECDC4;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+
+    .intro-section p {
+        color: #BDC3C7;
+        margin-bottom: 15px;
+    }
+
+    /* Cookie category styling */
+    .cookie-category {
+        background: rgba(52, 73, 94, 0.5);
+        padding: 25px;
+        margin: 25px 0;
+        border-radius: 15px;
+        border-left: 4px solid;
+    }
+
+    .cookie-category.essential {
+        border-left-color: #27AE60;
+    }
+
+    .cookie-category.functional {
+        border-left-color: #3498DB;
+    }
+
+    .cookie-category.analytics {
+        border-left-color: #F39C12;
+    }
+
+    .cookie-category.advertising {
+        border-left-color: #E74C3C;
+    }
+
+    .cookie-category h3 {
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cookie-category.essential h3 {
+        color: #27AE60;
+    }
+
+    .cookie-category.functional h3 {
+        color: #3498DB;
+    }
+
+    .cookie-category.analytics h3 {
+        color: #F39C12;
+    }
+
+    .cookie-category.advertising h3 {
+        color: #E74C3C;
+    }
+
+    .cookie-category p {
+        color: #BDC3C7;
+        margin-bottom: 15px;
+    }
+
+    .cookie-category ul {
+        color: #BDC3C7;
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .cookie-category li {
+        margin: 8px 0;
+        padding-left: 5px;
+    }
+
+    /* Cookie table */
+    .cookie-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .cookie-table th,
+    .cookie-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .cookie-table th {
+        background: rgba(78, 205, 196, 0.1);
+        color: #4ECDC4;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .cookie-table td {
+        color: #BDC3C7;
+        font-size: 0.9rem;
+    }
+
+    .cookie-table tr:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .status-required {
+        background: rgba(39, 174, 96, 0.2);
+        color: #27AE60;
+        border: 1px solid #27AE60;
+    }
+
+    .status-optional {
+        background: rgba(52, 152, 219, 0.2);
+        color: #3498DB;
+        border: 1px solid #3498DB;
+    }
+
+    .status-disabled {
+        background: rgba(149, 165, 166, 0.2);
+        color: #95A5A6;
+        border: 1px solid #95A5A6;
+    }
+
+    /* We don't use section */
+    .no-cookies {
+        background: rgba(39, 174, 96, 0.1);
+        border: 2px solid #27AE60;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .no-cookies h3 {
+        color: #27AE60;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .no-cookies ul {
+        list-style: none;
+        text-align: left;
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 0;
+    }
+
+    .no-cookies li {
+        color: #BDC3C7;
+        margin: 10px 0;
+        padding-left: 25px;
+        position: relative;
+    }
+
+    .no-cookies li::before {
+        content: "✅";
+        position: absolute;
+        left: 0;
+    }
+
+    /* Browser settings */
+    .browser-settings {
+        background: rgba(155, 89, 182, 0.1);
+        border: 1px solid #9B59B6;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+    }
+
+    .browser-settings h3 {
+        color: #9B59B6;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .browser-settings p {
+        color: #BDC3C7;
+        margin-bottom: 15px;
+    }
+
+    .browser-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .browser-card {
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .browser-card:hover {
+        transform: translateY(-3px);
+        background: rgba(155, 89, 182, 0.1);
+    }
+
+    .browser-card .browser-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .browser-card h4 {
+        color: #ECF0F1;
+        margin-bottom: 5px;
+        font-size: 1rem;
+    }
+
+    .browser-card p {
+        color: #95A5A6;
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    /* Contact section */
+    .contact-section {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        border: 2px solid #3498DB;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin: 40px 0;
+    }
+
+    .contact-section h3 {
+        color: #3498DB;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .contact-section p {
+        color: #BDC3C7;
+        margin-bottom: 10px;
+    }
+
+    /* Footer navigation */
+    .cookies-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #34495E;
+    }
+
+    .cookies-footer a {
+        color: #4ECDC4;
+        text-decoration: none;
+        margin: 0 20px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .cookies-footer a:hover {
+        color: #45B7B8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cookies-container {
+            margin: 40px auto;
+        }
+        
+        .cookies-card {
+            padding: 25px 20px;
+        }
+        
+        .cookies-title {
+            font-size: 1.8rem;
+        }
+        
+        .cookie-category {
+            padding: 20px 15px;
+        }
+        
+        .cookie-table {
+            font-size: 0.8rem;
+        }
+        
+        .cookie-table th,
+        .cookie-table td {
+            padding: 8px;
+        }
+        
+        .browser-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .cookies-footer a {
+            display: block;
+            margin: 10px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cookies-container">
+    <div class="cookies-card">
+        <h1 class="cookies-title">🍪 Cookie Policy{{ " (BETA)" if testing_mode }}</h1>
+        <p class="last-updated">Last updated: {{ moment().format('YYYY-MM-DD') if moment else "2025-01-01" }}</p>
+
+        {% if testing_mode %}
+        <div class="beta-notice">
+            Beta Version: This cookie policy applies to the beta testing phase only.
+        </div>
+        {% endif %}
+
+        <!-- Introduction -->
+        <div class="intro-section">
+            <h2>🤔 What are cookies?</h2>
+            <p>Cookies are small text files stored on your device when you visit our website. They help us provide essential functionality and improve your experience.</p>
+            <p><strong>ServeBeer takes a privacy-first approach</strong> - we only use essential cookies required for the service to function properly.</p>
+        </div>
+
+        <!-- Essential Cookies -->
+        <div class="cookie-category essential">
+            <h3>✅ Essential Cookies <span class="status-badge status-required">Required</span></h3>
+            <p>These cookies are necessary for the website to function properly and cannot be disabled:</p>
+            
+            <table class="cookie-table">
+                <thead>
+                    <tr>
+                        <th>Cookie Name</th>
+                        <th>Purpose</th>
+                        <th>Duration</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>session</strong></td>
+                        <td>User authentication and login state</td>
+                        <td>30 days{{ " (beta)" if testing_mode }}</td>
+                        <td>HTTP Only</td>
+                    </tr>
+                    <tr>
+                        <td><strong>cookiesAccepted</strong></td>
+                        <td>Remembers your cookie preferences</td>
+                        <td>1 year</td>
+                        <td>Local Storage</td>
+                    </tr>
+                    {% if testing_mode %}
+                    <tr>
+                        <td><strong>betaMode</strong></td>
+                        <td>Tracks beta testing status and preferences</td>
+                        <td>Session</td>
+                        <td>Local Storage</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            
+            <p><strong>Why we need these:</strong></p>
+            <ul>
+                <li><strong>session</strong> - Keeps you logged in and remembers your preferences</li>
+                <li><strong>cookiesAccepted</strong> - Prevents the cookie banner from showing repeatedly</li>
+                {% if testing_mode %}
+                <li><strong>betaMode</strong> - Ensures proper beta testing functionality and user experience</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- We DON'T use these cookies -->
+        <div class="no-cookies">
+            <h3>🚫 We do NOT use:</h3>
+            <ul>
+                <li>Tracking cookies</li>
+                <li>Advertising cookies</li>
+                <li>Social media cookies</li>
+                <li>Analytics cookies (Google Analytics, etc.)</li>
+                <li>Third-party cookies</li>
+                <li>Behavioral profiling cookies</li>
+                <li>Marketing cookies</li>
+                <li>Cross-site tracking</li>
+            </ul>
+            <p><strong>Your privacy is protected.</strong> We believe in minimal data collection and maximum user privacy.</p>
+        </div>
+
+        <!-- Functional Cookies (Currently Disabled) -->
+        <div class="cookie-category functional">
+            <h3>⚙️ Functional Cookies <span class="status-badge status-disabled">Not Used</span></h3>
+            <p>These cookies would enhance functionality but are currently disabled to protect your privacy:</p>
+            
+            <table class="cookie-table">
+                <thead>
+                    <tr>
+                        <th>Cookie Type</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Theme Preferences</td>
+                        <td>Remember dark/light mode choice</td>
+                        <td>❌ Disabled</td>
+                    </tr>
+                    <tr>
+                        <td>Language Settings</td>
+                        <td>Remember your preferred language</td>
+                        <td>❌ Disabled</td>
+                    </tr>
+                    <tr>
+                        <td>Dashboard Layout</td>
+                        <td>Remember dashboard customizations</td>
+                        <td>❌ Disabled</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p><em>These features may be enabled in future versions with user consent.</em></p>
+        </div>
+
+        <!-- Analytics Cookies (Explicitly Disabled) -->
+        <div class="cookie-category analytics">
+            <h3>📊 Analytics Cookies <span class="status-badge status-disabled">Disabled</span></h3>
+            <p>We have deliberately chosen <strong>NOT</strong> to use analytics cookies:</p>
+            <ul>
+                <li>❌ No Google Analytics</li>
+                <li>❌ No user behavior tracking</li>
+                <li>❌ No heatmap tracking</li>
+                <li>❌ No conversion tracking</li>
+                <li>❌ No performance monitoring cookies</li>
+            </ul>
+            <p><strong>Why?</strong> We believe your browsing patterns are private. We don't need to track you to provide a great IPFS service.</p>
+        </div>
+
+        <!-- Advertising Cookies (Never Used) -->
+        <div class="cookie-category advertising">
+            <h3>📢 Advertising Cookies <span class="status-badge status-disabled">Never Used</span></h3>
+            <p>ServeBeer will <strong>NEVER</strong> use advertising cookies:</p>
+            <ul>
+                <li>❌ No ad targeting</li>
+                <li>❌ No retargeting pixels</li>
+                <li>❌ No social media advertising cookies</li>
+                <li>❌ No cross-site advertising tracking</li>
+            </ul>
+            <p><strong>Our commitment:</strong> We're funded by community sponsorship, not advertising. Your privacy comes first.</p>
+        </div>
+
+        <!-- Browser Settings -->
+        <div class="browser-settings">
+            <h3>🌐 Managing Cookies in Your Browser</h3>
+            <p>You can control cookies through your browser settings. However, disabling essential cookies may prevent some website functionality from working properly.</p>
+            
+            <div class="browser-grid">
+                <div class="browser-card">
+                    <div class="browser-icon">🌍</div>
+                    <h4>Chrome</h4>
+                    <p>Settings → Privacy → Cookies</p>
+                </div>
+                <div class="browser-card">
+                    <div class="browser-icon">🦊</div>
+                    <h4>Firefox</h4>
+                    <p>Options → Privacy → Cookies</p>
+                </div>
+                <div class="browser-card">
+                    <div class="browser-icon">🔵</div>
+                    <h4>Edge</h4>
+                    <p>Settings → Site Permissions</p>
+                </div>
+                <div class="browser-card">
+                    <div class="browser-icon">🧭</div>
+                    <h4>Safari</h4>
+                    <p>Preferences → Privacy</p>
+                </div>
+            </div>
+            
+            <p><strong>Blocking essential cookies</strong> will prevent login functionality and may break the service.</p>
+        </div>
+
+        {% if testing_mode %}
+        <!-- Beta Testing Cookies -->
+        <div style="background: rgba(243, 156, 18, 0.1); border: 1px solid #F39C12; border-radius: 15px; padding: 25px; margin: 30px 0;">
+            <h3 style="color: #F39C12; margin-bottom: 15px;">🧪 Beta Testing Cookies</h3>
+            <p style="color: #BDC3C7; margin-bottom: 15px;">During beta testing, we use minimal additional cookies to improve the testing experience:</p>
+            <ul style="color: #BDC3C7;">
+                <li><strong>betaFeedback</strong> - Tracks which features you've tested (session only)</li>
+                <li><strong>debugMode</strong> - Enables additional debugging information for testers</li>
+                <li><strong>testingGroup</strong> - Assigns you to different testing scenarios</li>
+            </ul>
+            <p style="color: #BDC3C7; margin-top: 15px; font-style: italic;">These cookies will be removed when beta testing ends.</p>
+        </div>
+        {% endif %}
+
+        <!-- GDPR Compliance -->
+        <div style="background: rgba(52, 152, 219, 0.1); border: 1px solid #3498DB; border-radius: 15px; padding: 25px; margin: 30px 0;">
+            <h3 style="color: #3498DB; margin-bottom: 15px;">🇪🇺 GDPR Compliance</h3>
+            <p style="color: #BDC3C7; margin-bottom: 15px;">As a privacy-focused service, ServeBeer is designed to be GDPR compliant:</p>
+            <ul style="color: #BDC3C7;">
+                <li><strong>Lawful basis:</strong> Essential cookies are necessary for service functionality</li>
+                <li><strong>Data minimization:</strong> We collect only what's absolutely necessary</li>
+                <li><strong>Transparency:</strong> This policy explains exactly what we use</li>
+                <li><strong>User control:</strong> You can delete your account and data anytime</li>
+                <li><strong>No consent required:</strong> We only use essential cookies</li>
+            </ul>
+        </div>
+
+        <!-- Updates to Policy -->
+        <div style="background: rgba(155, 89, 182, 0.1); border: 1px solid #9B59B6; border-radius: 15px; padding: 25px; margin: 30px 0;">
+            <h3 style="color: #9B59B6; margin-bottom: 15px;">🔄 Updates to This Policy</h3>
+            <p style="color: #BDC3C7; margin-bottom: 15px;">We may update this cookie policy as our service evolves:</p>
+            <ul style="color: #BDC3C7;">
+                <li>Users will be notified of significant changes</li>
+                <li>Updates will be posted on this page with a new date</li>
+                <li>{{ "Beta users will receive update notifications via email" if testing_mode else "Email notifications for major policy changes" }}</li>
+                <li>Continued use constitutes acceptance of updates</li>
+            </ul>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h3>📞 Questions About Cookies?</h3>
+            <p>If you have questions about our cookie policy or privacy practices:</p>
+            <p style="margin-top: 15px;">
+                <strong>🌐 Website:</strong> <a href="{{ url_for('index') }}" style="color: #3498DB;">ServeBeer.com</a><br>
+                <strong>📧 GitHub:</strong> <a href="https://github.com/nftomczain/servebeer-ipfs" style="color: #3498DB;">@nftomczain/servebeer-ipfs</a><br>
+                <strong>🔗 ENS:</strong> <a href="https://nftomczain.eth.link" style="color: #3498DB;">nftomczain.eth</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="cookies-footer">
+            <a href="{{ url_for('index') }}">← Back to Home</a>
+            <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+            <a href="{{ url_for('sponsors_page') }}">Sponsor Tiers</a>
+        </div>
+
+        <!-- NFTomczain Universe footer -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #34495E; color: #95A5A6; font-size: 0.9em;">
+            <p><strong>Privacy-First Philosophy</strong></p>
+            <p style="font-style: italic;">"Decentralization includes data sovereignty and user privacy."</p>
+            <p>&copy; 2025 NFTomczain & NetNeroJes | 0x660C</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cookie acceptance functionality
+    function acceptCookies() {
+        localStorage.setItem('cookiesAccepted', 'true');
+        const banner = document.getElementById('cookie-banner');
+        if (banner) {
+            banner.style.display = 'none';
+        }
+        showNotification('Cookie preferences saved', 'success');
+    }
+
+    // Check if user has already accepted cookies
+    function checkCookieAcceptance() {
+        const accepted = localStorage.getItem('cookiesAccepted');
+        if (!accepted) {
+            // Show cookie banner (would be in base template)
+            console.log('Cookie acceptance required');
+        }
+    }
+
+    // Cookie information display
+    function showCookieInfo(cookieName) {
+        const cookieInfo = {
+            'session': 'Used for authentication and login state. Essential for service functionality.',
+            'cookiesAccepted': 'Remembers your cookie preferences to avoid showing the cookie banner repeatedly.',
+            'betaMode': 'Tracks beta testing status and ensures proper testing functionality.'
+        };
+        
+        const info = cookieInfo[cookieName] || 'Cookie information not available.';
+        showNotification(`${cookieName}: ${info}`, 'info');
+    }
+
+    // Initialize cookie management
+    document.addEventListener('DOMContentLoaded', function() {
+        checkCookieAcceptance();
+        
+        // Add click handlers to cookie names in tables
+        document.querySelectorAll('.cookie-table td strong').forEach(cookieName => {
+            cookieName.style.cursor = 'pointer';
+            cookieName.addEventListener('click', function() {
+                showCookieInfo(this.textContent);
+            });
+        });
+
+        // Browser card interactions
+        document.querySelectorAll('.browser-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const browserName = this.querySelector('h4').textContent;
+                showNotification(`Opening ${browserName} cookie settings guide...`, 'info');
+                
+                // In a real implementation, you might open specific help pages
+                const guides = {
+                    'Chrome': 'https://support.google.com/chrome/answer/95647',
+                    'Firefox': 'https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop',
+                    'Edge': 'https://support.microsoft.com/en-us/microsoft-edge/delete-cookies-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09',
+                    'Safari': 'https://support.apple.com/guide/safari/manage-cookies-and-website-data-sfri11471/mac'
+                };
+                
+                if (guides[browserName]) {
+                    // window.open(guides[browserName], '_blank');
+                    console.log(`Would open: ${guides[browserName]}`);
+                }
+            });
+        });
+
+        {% if testing_mode %}
+        // Beta testing cookie management
+        localStorage.setItem('betaMode', 'true');
+        console.log('Beta Mode: Cookie policy loaded for testing phase');
+        
+        // Show beta testing info
+        setTimeout(() => {
+            showNotification('🧪 Beta: Only essential cookies used during testing', 'info');
+        }, 2000);
+        {% endif %}
+    });
+
+    // Cookie audit function (for debugging)
+    function auditCookies() {
+        const cookies = document.cookie.split(';');
+        const localStorage = Object.keys(window.localStorage);
+        const sessionStorage = Object.keys(window.sessionStorage);
+        
+        console.log('Cookie Audit:');
+        console.log('HTTP Cookies:', cookies);
+        console.log('LocalStorage:', localStorage);
+        console.log('SessionStorage:', sessionStorage);
+        
+        return {
+            httpCookies: cookies.length,
+            localStorageItems: localStorage.length,
+            sessionStorageItems: sessionStorage.length
+        };
+    }
+
+    // Keyboard shortcut for cookie audit (Ctrl+Shift+C)
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            const audit = auditCookies();
+            showNotification(`Cookie Audit: ${audit.httpCookies} HTTP, ${audit.localStorageItems} Local, ${audit.sessionStorageItems} Session`, 'info');
+        }
+    });
+
+    // Auto-scroll to essential cookies section
+    setTimeout(() => {
+        const essentialSection = document.querySelector('.cookie-category.essential');
+        if (essentialSection && window.location.hash === '') {
+            essentialSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }, 1000);
+</script>
+{% endblock %}
