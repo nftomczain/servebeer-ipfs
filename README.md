@@ -157,7 +157,7 @@ docker run -p 5000:5000 -v ./database:/app/database servebeer-ipfs
 - `GET /sponsors` - Sponsor tiers
 - `GET /status` - System status
 
-[Full API Documentation](docs/api.md)
+[Full API Documentation](docs/API.md)
 
 ## 🏛️ Philosophy
 
