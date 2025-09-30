@@ -245,7 +245,8 @@ Support the project directly:
 ## 🔗 Links
 
 - **ENS Domain:** [nftomczain.eth](https://nftomczain.eth.link)
-- **IPFS Gateway:** [ServeBeer CDN](https://servebeer.com)
+- **Test IPFS Gateway:** [ServeBeer CDN](https://cda.servebeer.com:5000)
+- **Production IPFS Gateway:** [ServeBeer CDN](https://cda.servebeer.com)
 - **Project Universe:** [NFTomczain Manifests]([https://github.com/NFTomczajn/nftomczain-hub])
 
 ---
