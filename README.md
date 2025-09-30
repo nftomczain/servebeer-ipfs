@@ -195,7 +195,7 @@ python -m pytest --cov=app tests/
 
 ## 🚀 Production Deployment
 
-For production deployment, see [docs/deployment.md](docs/deployment.md)
+For production deployment, see [docs/deployment.md](docs/deployment-notes.md)
 
 **Key considerations:**
 - Use production WSGI server (Gunicorn/uWSGI)
